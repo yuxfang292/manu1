@@ -500,7 +500,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
             <div className="space-y-2">
               <div className="flex space-x-2">
                 <Select value={chatMode} onValueChange={(value: 'chat' | 'research') => setChatMode(value)}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-44 whitespace-nowrap">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

@@ -116,6 +116,8 @@ This is a full-stack web application built for compliance and regulatory change 
 - July 02, 2025: Added AI chatbot button in top right corner of regulatory table header
 - July 02, 2025: Implemented MCP (Model Context Protocol) integration with four functions
 - July 02, 2025: Replaced all "AI Assistant" references with "CUBOT" branding
+- July 02, 2025: Added chat mode/research mode dropdown selector in AI chat interface
+- July 02, 2025: Implemented backend research workflow with 4-step process: keyword generation, document search, quality assessment, and comprehensive response generation
 
 ## User Preferences
 

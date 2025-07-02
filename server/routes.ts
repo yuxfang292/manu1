@@ -21,7 +21,22 @@ async function executeResearchWorkflow(userQuery: string): Promise<string> {
     while (!qualityGood && retryAttempt <= maxRetries) {
       // Step 1: Generate keywords using MCP
       const keywordsResult = await mcpService.keywordsGen(userQuery, 'banking_regulation');
-      const generatedKeywords = keywordsResult.result?.keywords || [];
+      let generatedKeywords = [];
+      
+      // Handle the keywords result structure from MCP
+      if (keywordsResult.result?.keywords) {
+        if (Array.isArray(keywordsResult.result.keywords)) {
+          generatedKeywords = keywordsResult.result.keywords;
+        } else if (typeof keywordsResult.result.keywords === 'object') {
+          // Extract all keywords from primary, secondary, emerging arrays
+          const keywordObj = keywordsResult.result.keywords;
+          generatedKeywords = [
+            ...(keywordObj.primary || []),
+            ...(keywordObj.secondary || []),
+            ...(keywordObj.emerging || [])
+          ].filter(k => typeof k === 'string');
+        }
+      }
       
       // Add additional keywords based on the topic
       const additionalKeywords = extractAdditionalKeywords(userQuery);
@@ -46,7 +61,7 @@ async function executeResearchWorkflow(userQuery: string): Promise<string> {
     // Step 4: Generate comprehensive answer using all collected data
     const summaryResult = await mcpService.summary(
       foundDocuments.map(doc => doc.content || doc.excerpt || ''), 
-      { style: 'comprehensive', query: userQuery }
+      { style: 'comprehensive', length: 'detailed' }
     );
 
     // Build research context for final response
