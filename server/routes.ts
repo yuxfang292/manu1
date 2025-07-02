@@ -101,65 +101,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Chat endpoint with Gemini integration
+  // Enhanced AI Chat endpoint with comprehensive workflow
   app.post("/api/ai/chat", async (req, res) => {
     try {
-      const { message, history, mcpResults } = req.body;
+      const { message } = req.body;
       
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ message: "Message is required" });
       }
 
-      // Build conversation history for context
-      const conversationHistory = (history || []).map((msg: any) => {
-        return `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`;
-      }).join('\n');
-
-      // Build MCP context if available
-      let mcpContext = '';
-      if (mcpResults && Object.keys(mcpResults).length > 0) {
-        mcpContext = '\n\nMCP Research Results (use this information to enhance your response):\n';
-        
-        if (mcpResults.queryGen) {
-          mcpContext += `Query Generation: Generated optimized queries for compliance research\n`;
-        }
-        
-        if (mcpResults.contentSearch) {
-          mcpContext += `Content Search: Found ${mcpResults.contentSearch.result.totalResults} relevant regulatory documents\n`;
-          mcpContext += `Top sources: ${mcpResults.contentSearch.result.results.map((r: any) => r.title).join(', ')}\n`;
-        }
-        
-        if (mcpResults.keywordsGen) {
-          mcpContext += `Keywords Analysis: Identified key compliance terms and categories\n`;
-          mcpContext += `Primary keywords: ${mcpResults.keywordsGen.result.keywords.primary.join(', ')}\n`;
-        }
-        
-        if (mcpResults.summary) {
-          mcpContext += `Summary Analysis: Processed regulatory content for executive overview\n`;
-        }
-      }
-
-      // Call Gemini API using standard 2.5 Pro model
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-pro",
-        contents: `You are an expert AI compliance assistant specializing in banking and financial regulations. Provide detailed, accurate guidance on regulatory requirements, compliance frameworks, and best practices. Focus on practical, actionable advice for banking professionals. Use clear formatting with bullet points and bold text for key information.
-
-Previous conversation:
-${conversationHistory}${mcpContext}
-
-User question: ${message}
-
-${mcpContext ? 'Note: I have conducted MCP research to provide you with current and comprehensive regulatory information. Please incorporate these findings naturally into your response.' : ''}`,
-      });
-
-      const responseText = response.text || "I apologize, but I couldn't generate a response. Please try again.";
+      // Use enhanced AI service for comprehensive workflow
+      const { enhancedAIService } = await import("./enhanced-ai-service");
       
-      res.json({ 
-        response: responseText
+      const result = await enhancedAIService.processUserQuestion(message);
+
+      res.json({
+        response: result.answer,
+        workflow: {
+          steps: result.steps,
+          visualizations: result.visualizations,
+          memory: {
+            keywordsCount: result.memory.keywords.size,
+            documentsCount: result.memory.documents.size,
+            qualityScore: result.memory.qualityChecks[result.memory.qualityChecks.length - 1]?.score || 0,
+            attempts: result.memory.currentAttempt
+          }
+        }
       });
     } catch (error) {
-      console.error('AI Chat error:', error);
-      res.status(500).json({ message: "Failed to process AI request. Please check your API key." });
+      console.error('Enhanced AI Chat Error:', error);
+      res.status(500).json({ message: "Failed to get AI response" });
+    }
+  });
+
+  // Workflow progress endpoint for real-time updates
+  app.post("/api/ai/chat-stream", async (req, res) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      // Set up Server-Sent Events
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Cache-Control'
+      });
+
+      const { enhancedAIService } = await import("./enhanced-ai-service");
+      
+      const result = await enhancedAIService.processUserQuestion(
+        message,
+        (steps) => {
+          // Send progress update
+          res.write(`data: ${JSON.stringify({ type: 'progress', steps })}\n\n`);
+        }
+      );
+
+      // Send final result
+      res.write(`data: ${JSON.stringify({ 
+        type: 'complete', 
+        answer: result.answer,
+        workflow: {
+          steps: result.steps,
+          visualizations: result.visualizations,
+          memory: {
+            keywordsCount: result.memory.keywords.size,
+            documentsCount: result.memory.documents.size,
+            qualityScore: result.memory.qualityChecks[result.memory.qualityChecks.length - 1]?.score || 0,
+            attempts: result.memory.currentAttempt
+          }
+        }
+      })}\n\n`);
+
+      res.end();
+    } catch (error) {
+      console.error('Enhanced AI Chat Stream Error:', error);
+      res.write(`data: ${JSON.stringify({ type: 'error', message: 'Failed to process request' })}\n\n`);
+      res.end();
     }
   });
 

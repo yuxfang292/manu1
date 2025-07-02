@@ -16,6 +16,7 @@ import {
 import { useExtracts } from "@/hooks/use-extracts";
 import type { Extract } from "@shared/schema";
 import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
+import EnhancedAIChatModal from "@/components/enhanced-ai-chat-modal";
 
 interface RegulatoryTableProps {
   searchQuery?: string;
@@ -35,6 +36,7 @@ export default function RegulatoryTable({
   const [sortField, setSortField] = useState<string>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isEnhancedChatOpen, setIsEnhancedChatOpen] = useState(false);
 
   const { data: extracts, isLoading } = useExtracts(searchQuery, filters);
 
@@ -92,20 +94,18 @@ export default function RegulatoryTable({
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-semibold text-gray-900">Regulatory Groups</h1>
           <div className="flex items-center space-x-3">
-            {onContinueChat && (
-              <Button
-                onClick={onContinueChat}
-                size="sm"
-                className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-3 py-2"
-              >
-                <img 
-                  src={cubotIcon} 
-                  alt="CUBOT AI Assistant" 
-                  className="w-5 h-5 mr-2 object-contain" 
-                />
-                Ask CUBOT
-              </Button>
-            )}
+            <Button
+              onClick={() => setIsEnhancedChatOpen(true)}
+              size="sm"
+              className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-3 py-2"
+            >
+              <img 
+                src={cubotIcon} 
+                alt="CUBOT AI Assistant" 
+                className="w-5 h-5 mr-2 object-contain" 
+              />
+              Ask CUBOT
+            </Button>
             <Button variant="outline" size="sm" className="flex items-center">
               <Eye className="w-4 h-4 mr-2" />
               Select View
@@ -242,6 +242,12 @@ export default function RegulatoryTable({
           ))}
         </div>
       </div>
+
+      {/* Enhanced AI Chat Modal */}
+      <EnhancedAIChatModal
+        isOpen={isEnhancedChatOpen}
+        onClose={() => setIsEnhancedChatOpen(false)}
+      />
     </div>
   );
 }
