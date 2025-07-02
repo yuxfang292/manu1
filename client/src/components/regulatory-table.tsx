@@ -17,7 +17,7 @@ import {
 import { useExtracts } from "@/hooks/use-extracts";
 import type { Extract } from "@shared/schema";
 import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
-import EnhancedAIChatModal from "@/components/enhanced-ai-chat-modal";
+import EnhancedChatWorkspace from "@/components/enhanced-chat-workspace";
 import AIChatModal from "@/components/ai-chat-modal";
 
 interface RegulatoryTableProps {
@@ -105,23 +105,23 @@ export default function RegulatoryTable({
               <Button
                 onClick={() => setIsChatOpen(true)}
                 size="sm"
-                className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-3 py-2"
+                variant="outline"
+                className="border-blue-600 text-blue-600 hover:bg-blue-50"
               >
                 <img 
                   src={cubotIcon} 
                   alt="CUBOT AI Assistant" 
                   className="w-5 h-5 mr-2 object-contain" 
                 />
-                Ask CUBOT
+                Quick Chat
               </Button>
               <Button
                 onClick={() => setIsEnhancedChatOpen(true)}
                 size="sm"
-                variant="outline"
-                className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
-                Enhanced
+                Enhanced Workflow
               </Button>
             </div>
             <Button variant="outline" size="sm" className="flex items-center">
@@ -269,8 +269,8 @@ export default function RegulatoryTable({
         onGenerateSummary={onGenerateSummary}
       />
 
-      {/* Enhanced AI Chat Modal */}
-      <EnhancedAIChatModal
+      {/* Enhanced AI Chat Workspace */}
+      <EnhancedChatWorkspace
         isOpen={isEnhancedChatOpen}
         onClose={() => setIsEnhancedChatOpen(false)}
       />
