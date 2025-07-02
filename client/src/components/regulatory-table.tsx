@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -12,13 +11,11 @@ import {
   MessageCircle,
   AlertCircle,
   CheckCircle,
-  Clock,
-  Sparkles
+  Clock
 } from "lucide-react";
 import { useExtracts } from "@/hooks/use-extracts";
 import type { Extract } from "@shared/schema";
 import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
-import UnifiedChatModal from "@/components/unified-chat-modal";
 
 interface RegulatoryTableProps {
   searchQuery?: string;
@@ -26,8 +23,6 @@ interface RegulatoryTableProps {
   selectedCards: number[];
   onCardSelection: (cardId: number, selected: boolean) => void;
   onContinueChat?: () => void;
-  onSearch?: (query: string) => void;
-  onGenerateSummary?: () => void;
 }
 
 export default function RegulatoryTable({ 
@@ -35,14 +30,11 @@ export default function RegulatoryTable({
   filters, 
   selectedCards, 
   onCardSelection,
-  onContinueChat,
-  onSearch,
-  onGenerateSummary
+  onContinueChat 
 }: RegulatoryTableProps) {
   const [sortField, setSortField] = useState<string>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const { data: extracts, isLoading } = useExtracts(searchQuery, filters);
 
@@ -100,20 +92,20 @@ export default function RegulatoryTable({
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-semibold text-gray-900">Regulatory Groups</h1>
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
+            {onContinueChat && (
               <Button
-                onClick={() => setIsChatOpen(true)}
+                onClick={onContinueChat}
                 size="sm"
-                className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2"
+                className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-3 py-2"
               >
                 <img 
                   src={cubotIcon} 
                   alt="CUBOT AI Assistant" 
                   className="w-5 h-5 mr-2 object-contain" 
                 />
-                CUBOT AI Assistant
+                Ask CUBOT
               </Button>
-            </div>
+            )}
             <Button variant="outline" size="sm" className="flex items-center">
               <Eye className="w-4 h-4 mr-2" />
               Select View
@@ -250,14 +242,6 @@ export default function RegulatoryTable({
           ))}
         </div>
       </div>
-
-      {/* Unified AI Chat Modal */}
-      <UnifiedChatModal
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        onSearch={onSearch}
-        onGenerateSummary={onGenerateSummary}
-      />
     </div>
   );
 }
