@@ -10,7 +10,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
 import { useMCP } from "@/hooks/use-mcp";
-import MCPProcessIndicator from "./mcp-process-indicator";
 
 interface Message {
   id: string;
@@ -120,11 +119,44 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
       const mcpFunctionsToUse = await determineMCPFunctions(userQuery);
       let mcpResults: any = {};
 
-      // Execute MCP functions if needed
+      // Execute MCP functions if needed with natural status messages
       if (mcpFunctionsToUse.length > 0) {
+        // Add a thinking message to show CUBOT is researching
+        const thinkingMessage: Message = {
+          id: (Date.now() - 1).toString(),
+          role: 'assistant',
+          content: 'Let me research this for you...',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, thinkingMessage]);
+
         for (const func of mcpFunctionsToUse) {
           try {
             let result;
+            let statusMessage = '';
+            
+            switch (func) {
+              case 'query_gen':
+                statusMessage = 'Generating optimized search queries...';
+                break;
+              case 'content_search':
+                statusMessage = 'Searching regulatory databases...';
+                break;
+              case 'keywords_gen':
+                statusMessage = 'Analyzing compliance terminology...';
+                break;
+              case 'summary':
+                statusMessage = 'Processing regulatory content...';
+                break;
+            }
+
+            // Update the thinking message with current step
+            setMessages(prev => prev.map(msg => 
+              msg.id === thinkingMessage.id 
+                ? { ...msg, content: statusMessage }
+                : msg
+            ));
+
             switch (func) {
               case 'query_gen':
                 result = await mcp.queryGen(userQuery);
@@ -147,6 +179,9 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
             console.error(`MCP ${func} error:`, error);
           }
         }
+
+        // Remove thinking message before showing final response
+        setMessages(prev => prev.filter(msg => msg.id !== thinkingMessage.id));
       }
 
       const response = await fetch('/api/ai/chat', {
@@ -294,11 +329,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
         </DialogHeader>
 
         <div className="flex-1 flex flex-col space-y-4">
-          {/* MCP Process Indicator */}
-          <MCPProcessIndicator 
-            process={mcp.currentProcess} 
-            isVisible={mcp.isProcessing || mcp.currentProcess !== null} 
-          />
+
           
           {/* Messages Area */}
           <ScrollArea className="flex-1 border rounded-lg p-4 max-h-[60vh] overflow-y-auto">
