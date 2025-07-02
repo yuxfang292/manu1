@@ -109,54 +109,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Message is required" });
       }
 
-      // Call Gemini API with thinking mode using direct REST API
-      const requestBody = {
-        contents: [{
-          parts: [{
-            text: `You are an expert AI compliance assistant specializing in banking and financial regulations. Provide detailed, accurate guidance on regulatory requirements, compliance frameworks, and best practices. Focus on practical, actionable advice for banking professionals. Use clear formatting with bullet points and bold text for key information.
+      // Call Gemini API using standard 2.5 Pro model
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-pro",
+        contents: `You are an expert AI compliance assistant specializing in banking and financial regulations. Provide detailed, accurate guidance on regulatory requirements, compliance frameworks, and best practices. Focus on practical, actionable advice for banking professionals. Use clear formatting with bullet points and bold text for key information.
 
-User question: ${message}`
-          }]
-        }],
-        generationConfig: {
-          thinkingConfig: {
-            includeThoughts: true,
-            thinkingBudget: 2048
-          }
-        }
-      };
-
-      const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
+User question: ${message}`,
       });
 
-      if (!apiResponse.ok) {
-        throw new Error(`API request failed: ${apiResponse.statusText}`);
-      }
-
-      const apiData = await apiResponse.json();
-      
-      // Extract thinking and response from Gemini
-      let responseText = "I apologize, but I couldn't generate a response. Please try again.";
-      let thinkingText = null;
-
-      if (apiData.candidates?.[0]?.content?.parts) {
-        for (const part of apiData.candidates[0].content.parts) {
-          if (part.thought && part.text) {
-            thinkingText = part.text;
-          } else if (!part.thought && part.text) {
-            responseText = part.text;
-          }
-        }
-      }
+      const responseText = response.text || "I apologize, but I couldn't generate a response. Please try again.";
       
       res.json({ 
-        response: responseText,
-        thinking: thinkingText
+        response: responseText
       });
     } catch (error) {
       console.error('AI Chat error:', error);

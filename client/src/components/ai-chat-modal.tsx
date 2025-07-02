@@ -50,12 +50,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
     "How do liquidity coverage ratios work?"
   ];
 
-  const thinkingSteps = [
-    "Analyzing your question...",
-    "Reviewing relevant compliance frameworks...",
-    "Checking regulatory updates...",
-    "Formulating comprehensive response..."
-  ];
+
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -73,17 +68,6 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
     setIsLoading(true);
 
     try {
-      // Add thinking message placeholder
-      const thinkingMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'thinking',
-        content: 'CUBOT is thinking...',
-        timestamp: new Date(),
-        isThinking: true
-      };
-
-      setMessages(prev => [...prev, thinkingMessage]);
-
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: {
@@ -101,23 +85,8 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
 
       const data = await response.json();
       
-      // Remove thinking placeholder and add real thinking if available
-      setMessages(prev => prev.filter(msg => msg.id !== thinkingMessage.id));
-      
-      // Add thinking message if Gemini provided thinking data
-      if (data.thinking) {
-        const realThinkingMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'thinking',
-          content: data.thinking,
-          timestamp: new Date(),
-          isThinking: false
-        };
-        setMessages(prev => [...prev, realThinkingMessage]);
-      }
-      
       const assistantMessage: Message = {
-        id: (Date.now() + 2).toString(),
+        id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: data.response,
         timestamp: new Date(),
@@ -128,8 +97,6 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
-      // Remove thinking message on error
-      setMessages(prev => prev.filter(msg => msg.role === 'thinking'));
       toast({
         title: "Error",
         description: "Failed to get AI response. Please try again.",
