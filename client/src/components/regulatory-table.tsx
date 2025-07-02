@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useExtracts } from "@/hooks/use-extracts";
 import type { Extract } from "@shared/schema";
+import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
 
 interface RegulatoryTableProps {
   searchQuery?: string;
@@ -95,7 +96,7 @@ export default function RegulatoryTable({
                 className="bg-blue-600 text-white hover:bg-blue-700 px-3 py-2"
               >
                 <img 
-                  src="/attached_assets/CUBOT-Ready_1751471469146.png" 
+                  src={cubotIcon} 
                   alt="CUBOT AI Assistant" 
                   className="w-5 h-5 mr-2" 
                 />

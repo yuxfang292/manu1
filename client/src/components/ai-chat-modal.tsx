@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Send, Bot, User, Sparkles, Search, CheckCircle, FileText, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
 
 interface Message {
   id: string;
@@ -163,7 +164,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
           <DialogTitle className="flex items-center space-x-2">
             <div className="p-2 bg-blue-100 rounded-lg">
               <img 
-                src="/attached_assets/CUBOT-Ready_1751471469146.png" 
+                src={cubotIcon} 
                 alt="CUBOT AI Assistant" 
                 className="w-5 h-5" 
               />
@@ -196,7 +197,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                           <CheckCircle className="w-4 h-4 text-green-600" />
                         ) : (
                           <img 
-                            src="/attached_assets/CUBOT-Ready_1751471469146.png" 
+                            src={cubotIcon} 
                             alt="CUBOT AI Assistant" 
                             className="w-4 h-4" 
                           />
