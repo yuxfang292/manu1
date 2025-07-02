@@ -764,12 +764,35 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                   <Send className="w-4 h-4" />
                 </Button>
               </div>
-              <p className="text-xs text-gray-500">
-                {chatMode === 'research' 
-                  ? "Research mode: Uses MCP to find keywords, search documents, and provide comprehensive analysis"
-                  : "Chat mode: Direct conversation without document research"
-                }
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-500">
+                  {chatMode === 'research' 
+                    ? "Research mode: Uses MCP to find keywords, search documents, and provide comprehensive analysis"
+                    : "Chat mode: Direct conversation without document research"
+                  }
+                </p>
+                {messages.length > 1 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setMessages([{
+                        id: '1',
+                        role: 'assistant',
+                        content: 'Hello! I\'m CUBOT, your AI compliance assistant. I can help you with questions about regulatory requirements, capital ratios, compliance deadlines, and more. What would you like to know?',
+                        timestamp: new Date()
+                      }]);
+                      setCompletedQueries([]);
+                      setShowSessionComplete(false);
+                      setInput('');
+                    }}
+                    className="text-xs px-3 py-1 h-auto"
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" />
+                    New Chat
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </div>
