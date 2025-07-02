@@ -98,27 +98,27 @@
 }
 
 .cube-front { 
-  background: var(--primary-blue);
+  background: #3b82f6;
   transform: translateZ(20px);
 }
 .cube-back { 
-  background: var(--accent-blue);
+  background: #1e40af;
   transform: rotateY(180deg) translateZ(20px);
 }
 .cube-right { 
-  background: var(--primary-black);
+  background: #1d4ed8;
   transform: rotateY(90deg) translateZ(20px);
 }
 .cube-left { 
-  background: var(--accent-blue);
+  background: #2563eb;
   transform: rotateY(-90deg) translateZ(20px);
 }
 .cube-top { 
-  background: var(--supporting-blue);
+  background: #60a5fa;
   transform: rotateX(90deg) translateZ(20px);
 }
 .cube-bottom { 
-  background: var(--primary-grey);
+  background: #1e3a8a;
   transform: rotateX(-90deg) translateZ(20px);
 }
 

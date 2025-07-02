@@ -79,7 +79,7 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
       <nav className="flex-1 px-2 py-2">
         {menuItems.map((item) => {
           const IconComponent = item.icon;
-          const isActive = item.id === 'search'; // RegSearch is always active for this demo
+          const isActive = item.id === activeView;
           
           return (
             <Button
@@ -99,8 +99,27 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
         })}
       </nav>
 
+      {/* User Info */}
+      {!collapsed && (
+        <div className="p-4 border-t border-gray-600/20">
+          <div className="flex items-center space-x-3 mb-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-xs font-medium text-white">SR</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">
+                Welcome Suraj Rai
+              </p>
+              <p className="text-xs text-[var(--sidebar-text-muted)] truncate">
+                Financial Services Group (FSG)
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Help Center */}
-      <div className="p-2 border-t border-gray-600/20">
+      <div className="p-2">
         <Button
           variant="ghost"
           className={`w-full justify-start text-[var(--sidebar-text)] hover:text-white hover:bg-gray-600/20 ${
