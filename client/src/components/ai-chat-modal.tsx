@@ -23,7 +23,6 @@ interface Message {
   mcpData?: {
     keywords?: string[];
     documents?: any[];
-    quality?: { score: number; status: string };
   };
 }
 
@@ -229,46 +228,10 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
           : msg
       ));
 
-      // Step 3: Quality assessment
-      const step3Message: Message = {
-        id: `step3-${Date.now()}`,
-        role: 'system',
-        content: '⚖️ **Step 3:** Assessing document quality...',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, step3Message]);
-
-      // Enhanced quality assessment with metrics
+      // Step 3: Quality assessment (silent)
       const qualityGood = documents.length > 0;
-      const avgRelevance = documents.length > 0 
-        ? Math.round((documents.reduce((sum: number, doc: any) => sum + (doc.relevanceScore || 0.8), 0) / documents.length) * 100)
-        : 0;
 
-      setMessages(prev => prev.map(msg => 
-        msg.id === step3Message.id 
-          ? { 
-              ...msg, 
-              content: `✅ **Step 3 Complete:** Quality Assessment`,
-              mcpData: { 
-                quality: { 
-                  score: avgRelevance, 
-                  status: qualityGood ? 'High Quality' : 'Standard',
-                  documentsCount: documents.length,
-                  keywordsCount: keywords.length 
-                }
-              }
-            }
-          : msg
-      ));
-
-      // Step 4: Generate comprehensive response
-      const step4Message: Message = {
-        id: `step4-${Date.now()}`,
-        role: 'system',
-        content: '🎯 **Step 4:** Generating comprehensive analysis...',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, step4Message]);
+      // Step 4: Generate comprehensive response (silently)
 
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
@@ -287,8 +250,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
 
       const data = await response.json();
 
-      // Replace step 4 with final response
-      setMessages(prev => prev.filter(msg => msg.id !== step4Message.id));
+      // Add final response
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -559,31 +521,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                                   </div>
                                 )}
                                 
-                                {/* Quality Assessment Display */}
-                                {message.mcpData.quality && (
-                                  <div className="bg-gray-50 rounded-lg p-3">
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
-                                      <div>
-                                        <span className="font-medium">Documents Found:</span>
-                                        <span className="ml-2 text-blue-600">{message.mcpData.quality.documentsCount}</span>
-                                      </div>
-                                      <div>
-                                        <span className="font-medium">Avg. Relevance:</span>
-                                        <span className="ml-2 text-green-600">{message.mcpData.quality.score}%</span>
-                                      </div>
-                                      <div>
-                                        <span className="font-medium">Quality Status:</span>
-                                        <span className={`ml-2 ${message.mcpData.quality.status === 'High Quality' ? 'text-green-600' : 'text-orange-600'}`}>
-                                          {message.mcpData.quality.status}
-                                        </span>
-                                      </div>
-                                      <div>
-                                        <span className="font-medium">Keywords Used:</span>
-                                        <span className="ml-2 text-purple-600">{message.mcpData.quality.keywordsCount}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
+
                               </div>
                             )}
                           </div>
