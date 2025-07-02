@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertSummarySchema } from "@shared/schema";
 import { z } from "zod";
 import { GoogleGenAI } from "@google/genai";
+import { mcpService, type MCPResponse } from "./mcp-service";
 
 // This API key is from Gemini Developer API Key, not vertex AI API Key
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
@@ -125,6 +126,78 @@ User question: ${message}`,
     } catch (error) {
       console.error('AI Chat error:', error);
       res.status(500).json({ message: "Failed to process AI request. Please check your API key." });
+    }
+  });
+
+  // MCP Function endpoints
+  app.post("/api/mcp/query-gen", async (req, res) => {
+    try {
+      const { userQuery, context } = req.body;
+      if (!userQuery) {
+        return res.status(400).json({ message: "userQuery is required" });
+      }
+      
+      const result = await mcpService.queryGen(userQuery, context);
+      res.json(result);
+    } catch (error) {
+      console.error('MCP Query Gen error:', error);
+      res.status(500).json({ message: "Failed to generate queries" });
+    }
+  });
+
+  app.post("/api/mcp/content-search", async (req, res) => {
+    try {
+      const { query, filters } = req.body;
+      if (!query) {
+        return res.status(400).json({ message: "query is required" });
+      }
+      
+      const result = await mcpService.contentSearch(query, filters);
+      res.json(result);
+    } catch (error) {
+      console.error('MCP Content Search error:', error);
+      res.status(500).json({ message: "Failed to search content" });
+    }
+  });
+
+  app.post("/api/mcp/keywords-gen", async (req, res) => {
+    try {
+      const { content, category } = req.body;
+      if (!content) {
+        return res.status(400).json({ message: "content is required" });
+      }
+      
+      const result = await mcpService.keywordsGen(content, category);
+      res.json(result);
+    } catch (error) {
+      console.error('MCP Keywords Gen error:', error);
+      res.status(500).json({ message: "Failed to generate keywords" });
+    }
+  });
+
+  app.post("/api/mcp/summary", async (req, res) => {
+    try {
+      const { content, options } = req.body;
+      if (!content || !Array.isArray(content)) {
+        return res.status(400).json({ message: "content array is required" });
+      }
+      
+      const result = await mcpService.summary(content, options);
+      res.json(result);
+    } catch (error) {
+      console.error('MCP Summary error:', error);
+      res.status(500).json({ message: "Failed to generate summary" });
+    }
+  });
+
+  // Get available MCP functions
+  app.get("/api/mcp/functions", async (req, res) => {
+    try {
+      const functions = mcpService.getFunctions();
+      res.json(functions);
+    } catch (error) {
+      console.error('MCP Functions error:', error);
+      res.status(500).json({ message: "Failed to get MCP functions" });
     }
   });
 

@@ -9,6 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
+import { useMCP } from "@/hooks/use-mcp";
+import MCPProcessIndicator from "./mcp-process-indicator";
 
 interface Message {
   id: string;
@@ -41,6 +43,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
   const [showSessionComplete, setShowSessionComplete] = useState(false);
   const [completedQueries, setCompletedQueries] = useState<string[]>([]);
   const { toast } = useToast();
+  const mcp = useMCP();
 
   const exampleQuestions = [
     "What are the capital requirements for my banking group?",
@@ -49,6 +52,51 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
     "When are the next stress testing deadlines?",
     "How do liquidity coverage ratios work?"
   ];
+
+  const handleMCPFunction = async (functionType: 'query_gen' | 'content_search' | 'keywords_gen' | 'summary') => {
+    try {
+      let result;
+      const sampleContent = "Banking regulatory compliance frameworks including Basel III capital requirements, liquidity coverage ratios, and stress testing methodologies.";
+      
+      switch (functionType) {
+        case 'query_gen':
+          result = await mcp.queryGen("Basel III capital requirements");
+          break;
+        case 'content_search':
+          result = await mcp.contentSearch("Basel III liquidity coverage ratio");
+          break;
+        case 'keywords_gen':
+          result = await mcp.keywordsGen(sampleContent, "banking_regulation");
+          break;
+        case 'summary':
+          result = await mcp.summary([sampleContent], { style: 'executive', length: 'detailed' });
+          break;
+      }
+
+      // Add result as a message
+      const resultMessage: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: `**MCP ${functionType.replace('_', ' ').toUpperCase()} Results:**\n\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\``,
+        timestamp: new Date(),
+        showActionButtons: false
+      };
+
+      setMessages(prev => [...prev, resultMessage]);
+      
+      toast({
+        title: "MCP Function Complete",
+        description: `Successfully executed ${functionType.replace('_', ' ')} function`,
+      });
+    } catch (error) {
+      console.error('MCP Function error:', error);
+      toast({
+        title: "MCP Error",
+        description: "Failed to execute MCP function. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
 
 
@@ -183,6 +231,12 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
         </DialogHeader>
 
         <div className="flex-1 flex flex-col space-y-4">
+          {/* MCP Process Indicator */}
+          <MCPProcessIndicator 
+            process={mcp.currentProcess} 
+            isVisible={mcp.isProcessing || mcp.currentProcess !== null} 
+          />
+          
           {/* Messages Area */}
           <ScrollArea className="flex-1 border rounded-lg p-4 max-h-[60vh] overflow-y-auto">
             <div className="space-y-4">
@@ -353,6 +407,55 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                     {question}
                   </Badge>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* MCP Function Demo Buttons */}
+          {messages.length === 1 && (
+            <div className="border rounded-lg p-4 bg-blue-50">
+              <h4 className="text-sm font-medium text-gray-900 mb-3">MCP Research Functions:</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleMCPFunction('query_gen')}
+                  disabled={mcp.isProcessing}
+                  className="flex items-center gap-2 text-xs"
+                >
+                  <Search className="w-3 h-3" />
+                  Query Gen
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleMCPFunction('content_search')}
+                  disabled={mcp.isProcessing}
+                  className="flex items-center gap-2 text-xs"
+                >
+                  <FileText className="w-3 h-3" />
+                  Content Search
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleMCPFunction('keywords_gen')}
+                  disabled={mcp.isProcessing}
+                  className="flex items-center gap-2 text-xs"
+                >
+                  <Bot className="w-3 h-3" />
+                  Keywords Gen
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleMCPFunction('summary')}
+                  disabled={mcp.isProcessing}
+                  className="flex items-center gap-2 text-xs"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  Summary
+                </Button>
               </div>
             </div>
           )}
