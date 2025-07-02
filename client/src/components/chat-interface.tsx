@@ -58,10 +58,10 @@ export default function ChatInterface({ onSearch, onPreConfiguredQuery }: ChatIn
   ];
 
   return (
-    <div className="welcome-container bg-primary-white rounded-2xl shadow-xl border border-secondary-grey p-8 relative overflow-hidden">
+    <div className="welcome-container bg-white rounded-lg border border-gray-200 p-8 relative overflow-hidden h-full">
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary-blue/5 to-accent-blue/10 rounded-full -translate-y-32 translate-x-32"></div>
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-supporting-blue/20 to-accent-blue/5 rounded-full translate-y-24 -translate-x-24"></div>
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full -translate-y-32 translate-x-32"></div>
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-50/50 to-indigo-50/30 rounded-full translate-y-24 -translate-x-24"></div>
       
       <div className="relative z-10">
         <div className="text-center mb-8">

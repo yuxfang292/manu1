@@ -8,11 +8,12 @@ This is a full-stack web application built for compliance and regulatory change 
 
 ### Frontend Architecture
 - **Framework**: React with TypeScript
-- **Styling**: Tailwind CSS with custom color palette for banking compliance
+- **Styling**: Tailwind CSS with dashboard-specific color palette
 - **UI Components**: Radix UI primitives with shadcn/ui component library
 - **State Management**: React hooks with TanStack Query for server state
 - **Routing**: Wouter for lightweight client-side routing
 - **Build Tool**: Vite with custom configuration for development and production
+- **Layout**: Professional dashboard with collapsible sidebar and main content area
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js
@@ -21,31 +22,39 @@ This is a full-stack web application built for compliance and regulatory change 
 - **Development**: Hot module replacement via Vite middleware in development
 
 ### Data Storage Solutions
-- **Database**: PostgreSQL with Drizzle ORM
-- **Schema**: Structured tables for extracts, keywords, and summaries
-- **Development Storage**: In-memory storage implementation for development/demo
+- **Database**: PostgreSQL with Drizzle ORM (Production)
+- **Schema**: Structured tables for extracts, keywords, summaries, and users
+- **Storage Implementation**: DatabaseStorage class using Drizzle ORM
 - **Migration**: Drizzle Kit for database schema management
+- **Connection**: Neon serverless PostgreSQL with WebSocket support
 
 ## Key Components
 
-### Chat Interface
-- Welcome screen with pre-configured regulatory category buttons
-- Free-text search capability
-- Smooth transition to data exploration view
+### Dashboard Layout
+- Professional sidebar navigation with collapsible functionality
+- Module-based navigation (RegSearch, RegDashboard, RegTrend, etc.)
+- User information display with welcome message
+- Static 3D cube logo with blue color scheme
 
-### Data Exploration
-- Card-based display of regulatory extracts
-- Advanced filtering by categories, jurisdictions, priorities, and keywords
-- List/grid view toggle
-- Pagination for large datasets
-- Multi-select capability for summary generation
+### Search Interface
+- Comprehensive search screen with AI assistant integration
+- Quick filter badges for common search criteria
+- Compliance area exploration cards with visual icons
+- Recent activity tracking and status badges
+- Interactive search with intelligent suggestions
 
-### Filter System
-- Sidebar-based filtering interface
-- Real-time filter application
-- Category-based organization (Capital Adequacy, Risk Management, etc.)
-- Keyword-based search functionality
-- Date range filtering
+### Compliance Explorer
+- Chat-based interface for regulatory guidance
+- Pre-configured compliance category buttons
+- Visual category cards with descriptions and counts
+- Smooth transitions between search and exploration modes
+
+### Data Table View
+- Professional table layout matching enterprise dashboard standards
+- Sortable columns with regulatory extract information
+- Multi-select functionality with checkboxes
+- Pagination controls and result counts
+- Status indicators and priority badges
 
 ### Summary Generation
 - AI-like summary creation from selected extracts

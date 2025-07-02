@@ -3,6 +3,7 @@ import Sidebar from "@/components/sidebar";
 import MainHeader from "@/components/main-header";
 import RegulatoryTable from "@/components/regulatory-table";
 import ChatInterface from "@/components/chat-interface";
+import SearchInterface from "@/components/search-interface";
 import SummaryModal from "@/components/summary-modal";
 
 export default function Home() {
@@ -55,36 +56,41 @@ export default function Home() {
               onSearch={handleSearch}
               showCreateButton={true}
             />
-            <div className="flex-1 p-6">
+            <div className="flex-1">
               {searchQuery ? (
-                <RegulatoryTable
-                  searchQuery={searchQuery}
-                  filters={filters}
-                  selectedCards={selectedCards}
-                  onCardSelection={handleCardSelection}
-                />
-              ) : (
-                <div className="flex items-center justify-center h-64">
-                  <div className="text-center">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Search Regulatory Groups
-                    </h3>
-                    <p className="text-gray-600">
-                      Use the search bar above to find regulatory compliance groups and documents.
-                    </p>
-                  </div>
+                <div className="p-6">
+                  <RegulatoryTable
+                    searchQuery={searchQuery}
+                    filters={filters}
+                    selectedCards={selectedCards}
+                    onCardSelection={handleCardSelection}
+                  />
                 </div>
+              ) : (
+                <SearchInterface
+                  onSearch={handleSearch}
+                  onExploreCategory={handleSearch}
+                />
               )}
             </div>
           </div>
         );
       case 'explorer':
         return (
-          <div className="flex-1 p-6">
-            <ChatInterface 
+          <div className="flex-1 flex flex-col">
+            <MainHeader
+              title="Compliance Explorer"
+              subtitle="Interactive regulatory guidance and exploration"
+              searchPlaceholder="Ask about regulations..."
               onSearch={handleSearch}
-              onPreConfiguredQuery={handleSearch}
+              showCreateButton={false}
             />
+            <div className="flex-1 p-6">
+              <ChatInterface 
+                onSearch={handleSearch}
+                onPreConfiguredQuery={handleSearch}
+              />
+            </div>
           </div>
         );
       default:
