@@ -91,17 +91,17 @@ export default function RegulatoryTable({
               <th className="px-4 py-3 w-8">
                 <Star className="w-4 h-4 text-gray-400" />
               </th>
-              <SortHeader field="name">Name</SortHeader>
-              <SortHeader field="version">Version</SortHeader>
-              <SortHeader field="created_by">Created By</SortHeader>
-              <SortHeader field="created_date">Created Date</SortHeader>
-              <SortHeader field="updated_by">Updated By</SortHeader>
-              <SortHeader field="updated_date">Updated Date</SortHeader>
-              <SortHeader field="regbooks">RegBooks</SortHeader>
-              <SortHeader field="sections">Sections</SortHeader>
-              <SortHeader field="extracts">Extracts</SortHeader>
-              <SortHeader field="narratives">Narratives</SortHeader>
-              <th className="px-4 py-3 w-8"></th>
+              <SortHeader field="title">Title</SortHeader>
+              <SortHeader field="category">Category</SortHeader>
+              <SortHeader field="source">Source</SortHeader>
+              <SortHeader field="jurisdiction">Jurisdiction</SortHeader>
+              <SortHeader field="priority">Priority</SortHeader>
+              <SortHeader field="lastUpdated">Last Updated</SortHeader>
+              <SortHeader field="effectiveDate">Effective Date</SortHeader>
+              <SortHeader field="relevanceScore">Relevance</SortHeader>
+              <th className="px-4 py-3 w-8">
+                <MoreHorizontal className="w-4 h-4 text-gray-400" />
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-[var(--table-border)]">
@@ -122,8 +122,8 @@ export default function RegulatoryTable({
                 </td>
                 <td className="px-4 py-4">
                   <div className="flex items-center">
-                    <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-xs font-medium text-yellow-800">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                      <span className="text-xs font-medium text-blue-800">
                         {extract.category.charAt(0)}
                       </span>
                     </div>
@@ -132,33 +132,47 @@ export default function RegulatoryTable({
                         {extract.title}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {extract.category}
+                        {extract.excerpt.substring(0, 60)}...
                       </div>
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-4 text-sm text-gray-900">1</td>
-                <td className="px-4 py-4 text-sm text-gray-900">System Admin</td>
-                <td className="px-4 py-4 text-sm text-gray-900">
-                  {new Date().toLocaleDateString()}
-                </td>
-                <td className="px-4 py-4 text-sm text-gray-900">System Admin</td>
-                <td className="px-4 py-4 text-sm text-gray-900">
-                  {extract.lastUpdated}
-                </td>
-                <td className="px-4 py-4 text-sm text-gray-900">
-                  <Badge className={getPriorityBadge(extract.priority)}>
-                    {extract.relevanceScore}
+                <td className="px-4 py-4">
+                  <Badge variant="secondary" className="text-xs">
+                    {extract.category}
                   </Badge>
                 </td>
                 <td className="px-4 py-4 text-sm text-gray-900">
-                  {Math.floor(Math.random() * 5) + 1}
+                  {extract.source}
                 </td>
-                <td className="px-4 py-4 text-sm text-gray-900">
-                  {Math.floor(Math.random() * 10) + 1}
+                <td className="px-4 py-4">
+                  <Badge variant="outline" className="text-xs">
+                    {extract.jurisdiction}
+                  </Badge>
                 </td>
-                <td className="px-4 py-4 text-sm text-gray-900">
-                  {Math.floor(Math.random() * 3)}
+                <td className="px-4 py-4">
+                  <Badge className={getPriorityBadge(extract.priority)}>
+                    {extract.priority}
+                  </Badge>
+                </td>
+                <td className="px-4 py-4 text-sm text-gray-500">
+                  {new Date(extract.lastUpdated).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-4 text-sm text-gray-500">
+                  {extract.effectiveDate ? new Date(extract.effectiveDate).toLocaleDateString() : 'N/A'}
+                </td>
+                <td className="px-4 py-4">
+                  <div className="flex items-center">
+                    <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full" 
+                        style={{ width: `${extract.relevanceScore * 100}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs text-gray-600">
+                      {Math.round(extract.relevanceScore * 100)}%
+                    </span>
+                  </div>
                 </td>
                 <td className="px-4 py-4">
                   <Button variant="ghost" size="sm">
