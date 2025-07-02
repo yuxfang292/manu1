@@ -130,21 +130,9 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
         : msg
     ));
     
-    // Add a system message confirming the query is complete
-    const doneMessage: Message = {
-      id: Date.now().toString(),
-      role: 'system',
-      content: 'Query marked as complete. Feel free to ask another question!',
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, doneMessage]);
-
-    // Check if user has completed multiple queries to show session completion options
+    // Check if user has completed any queries to show session completion options
     const newCompletedCount = completedQueries.length + 1;
-    if (newCompletedCount >= 2) {
-      setShowSessionComplete(true);
-    }
+    setShowSessionComplete(true);
   };
 
   const handleGenerateSummary = () => {
@@ -295,7 +283,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                 </div>
                 
                 <p className="text-gray-600">
-                  You've completed {completedQueries.length} queries in this session. Would you like to generate a research summary or start a new session?
+                  You've completed {completedQueries.length} {completedQueries.length === 1 ? 'query' : 'queries'} in this session. Would you like to generate a research summary, continue asking questions, or start a new session?
                 </p>
                 
                 <div className="flex items-center justify-center space-x-3 pt-2">
