@@ -78,7 +78,7 @@ export default function FinalReportModal({
     }
   }, [isOpen, selectedCards, keywords]);
 
-  const selectedExtracts = extracts?.filter(extract => 
+  const selectedExtracts = extracts?.filter((extract: any) => 
     selectedDocuments.includes(extract.id)
   ) || [];
 
@@ -117,7 +117,8 @@ export default function FinalReportModal({
         searchQuery
       });
 
-      const { reportId } = response;
+      const data = await response.json();
+      const { reportId } = data;
       
       toast({
         title: "Report Generated",
@@ -264,7 +265,7 @@ export default function FinalReportModal({
                 Select specific documents for the report ({selectedDocuments.length} selected)
               </p>
               <div className="space-y-2 max-h-64 overflow-y-auto">
-                {extracts?.filter(extract => selectedCards.includes(extract.id)).map((extract) => (
+                {extracts?.filter((extract: any) => selectedCards.includes(extract.id)).map((extract: any) => (
                   <Card key={extract.id} className="p-0">
                     <CardContent className="p-3">
                       <div className="flex items-start space-x-3">

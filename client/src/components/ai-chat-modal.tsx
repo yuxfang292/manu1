@@ -11,6 +11,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
 import { useMCP } from "@/hooks/use-mcp";
+import FinalReportModal from './final-report-modal';
 
 interface Message {
   id: string;
@@ -47,6 +48,9 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
   const [showSessionComplete, setShowSessionComplete] = useState(false);
   const [completedQueries, setCompletedQueries] = useState<string[]>([]);
   const [chatMode, setChatMode] = useState<'chat' | 'research'>('chat');
+  const [showFinalReportModal, setShowFinalReportModal] = useState(false);
+  const [finalReportQuery, setFinalReportQuery] = useState<string>('');
+  const [finalReportKeywords, setFinalReportKeywords] = useState<string[]>([]);
   const { toast } = useToast();
   const mcp = useMCP();
 
@@ -319,6 +323,16 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
       onSearch(query);
       onClose();
     }
+  }
+
+  const handleFinalReport = (query: string) => {
+    // Extract keywords from the message that contains MCP data
+    const message = messages.find(msg => msg.userQuery === query && msg.mcpData?.keywords);
+    const keywords = message?.mcpData?.keywords || [];
+    
+    setFinalReportQuery(query);
+    setFinalReportKeywords(keywords);
+    setShowFinalReportModal(true);
   };
 
   const handleMarkDone = (messageId: string) => {
@@ -545,6 +559,15 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                             <Button
                               size="sm"
                               variant="outline"
+                              onClick={() => handleFinalReport(message.userQuery!)}
+                              className="text-xs"
+                            >
+                              <FileText className="w-3 h-3 mr-1" />
+                              Final Report
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
                               onClick={() => handleMarkDone(message.id)}
                               className="text-xs"
                             >
@@ -601,23 +624,21 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
 
           {/* Session Completion Options */}
           {showSessionComplete && (
-            <div className="border rounded-lg p-6 bg-gradient-to-r from-blue-50 to-green-50">
-              <div className="text-center space-y-4">
-                <div className="flex items-center justify-center space-x-2">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">Session Complete</h3>
+            <div className="border rounded-lg p-4 bg-gradient-to-r from-blue-50 to-green-50">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <h3 className="font-semibold text-gray-900">Session Complete</h3>
+                  <span className="text-sm text-gray-600">({completedQueries.length} {completedQueries.length === 1 ? 'query' : 'queries'})</span>
                 </div>
                 
-                <p className="text-gray-600">
-                  You've completed {completedQueries.length} {completedQueries.length === 1 ? 'query' : 'queries'} in this session. Would you like to generate a research summary, continue asking questions, or start a new session?
-                </p>
-                
-                <div className="flex items-center justify-center space-x-3 pt-2">
+                <div className="flex items-center space-x-2">
                   <Button
                     onClick={handleGenerateSummary}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
+                    size="sm"
                   >
-                    <FileText className="w-4 h-4 mr-2" />
+                    <FileText className="w-4 h-4 mr-1" />
                     Generate Summary
                   </Button>
                   
@@ -625,30 +646,21 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                     onClick={() => setShowSessionComplete(false)}
                     variant="outline"
                     className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                    size="sm"
                   >
-                    <Send className="w-4 h-4 mr-2" />
-                    Continue Session
+                    <Send className="w-4 h-4 mr-1" />
+                    Continue
                   </Button>
                   
                   <Button
                     onClick={handleRestartSession}
                     variant="outline"
                     className="border-gray-300"
+                    size="sm"
                   >
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Start New Session
+                    <RotateCcw className="w-4 h-4 mr-1" />
+                    New Session
                   </Button>
-                </div>
-                
-                <div className="text-xs text-gray-500 pt-2">
-                  <p>Your completed queries:</p>
-                  <div className="flex flex-wrap gap-1 mt-1 justify-center">
-                    {completedQueries.map((query, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {query.length > 30 ? `${query.substring(0, 30)}...` : query}
-                      </Badge>
-                    ))}
-                  </div>
                 </div>
               </div>
             </div>
@@ -706,6 +718,15 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
           )}
         </div>
       </DialogContent>
+      
+      {/* Final Report Modal */}
+      <FinalReportModal
+        isOpen={showFinalReportModal}
+        onClose={() => setShowFinalReportModal(false)}
+        selectedCards={[]} // Will be populated from search results
+        keywords={finalReportKeywords}
+        searchQuery={finalReportQuery}
+      />
     </Dialog>
   );
 }
