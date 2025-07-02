@@ -15,6 +15,10 @@ export const extracts = pgTable("extracts", {
   relevanceScore: integer("relevance_score").notNull(), // 1-100
   keywords: text("keywords").array().notNull(),
   fullText: text("full_text").notNull(),
+  createdBy: text("created_by"),
+  updatedBy: text("updated_by"),
+  createdDate: text("created_date"),
+  updatedDate: text("updated_date"),
 });
 
 export const keywords = pgTable("keywords", {

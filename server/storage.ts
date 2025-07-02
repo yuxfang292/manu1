@@ -68,7 +68,11 @@ export class MemStorage implements IStorage {
         lastUpdated: "Dec 15, 2023",
         relevanceScore: 95,
         keywords: ["capital requirements", "basel iii", "tier 1", "common equity"],
-        fullText: "A banking organization must maintain minimum capital ratios as specified in this section. The minimum common equity tier 1 capital ratio is 4.5 percent. The minimum tier 1 capital ratio is 6.0 percent. The minimum total capital ratio is 8.0 percent. These ratios must be calculated in accordance with the definitions and methods set forth in this part."
+        fullText: "A banking organization must maintain minimum capital ratios as specified in this section. The minimum common equity tier 1 capital ratio is 4.5 percent. The minimum tier 1 capital ratio is 6.0 percent. The minimum total capital ratio is 8.0 percent. These ratios must be calculated in accordance with the definitions and methods set forth in this part.",
+        createdBy: "Sarah Martinez",
+        updatedBy: "Michael Chen",
+        createdDate: "2019-01-01",
+        updatedDate: "Dec 15, 2023"
       },
       {
         title: "Tier 1 Leverage Ratio Requirements",
@@ -81,7 +85,11 @@ export class MemStorage implements IStorage {
         lastUpdated: "Nov 28, 2023",
         relevanceScore: 87,
         keywords: ["leverage ratio", "tier 1", "supplementary", "advanced approaches"],
-        fullText: "A banking organization must maintain a minimum tier 1 leverage ratio of 4.0 percent. Advanced approaches banking organizations must maintain a minimum supplementary leverage ratio of 3.0 percent, calculated as the ratio of tier 1 capital to total leverage exposure."
+        fullText: "A banking organization must maintain a minimum tier 1 leverage ratio of 4.0 percent. Advanced approaches banking organizations must maintain a minimum supplementary leverage ratio of 3.0 percent, calculated as the ratio of tier 1 capital to total leverage exposure.",
+        createdBy: "David Kim",
+        updatedBy: "Jennifer Wilson",
+        createdDate: "2018-01-01",
+        updatedDate: "Nov 28, 2023"
       },
       {
         title: "Capital Conservation Buffer",
@@ -94,7 +102,11 @@ export class MemStorage implements IStorage {
         lastUpdated: "Dec 10, 2023",
         relevanceScore: 92,
         keywords: ["capital conservation", "buffer", "constraints", "distributions"],
-        fullText: "Banking organizations must maintain a capital conservation buffer of 2.5 percent of common equity tier 1 capital above the minimum capital ratios. Failure to maintain the buffer results in automatic constraints on capital distributions and discretionary bonus payments."
+        fullText: "Banking organizations must maintain a capital conservation buffer of 2.5 percent of common equity tier 1 capital above the minimum capital ratios. Failure to maintain the buffer results in automatic constraints on capital distributions and discretionary bonus payments.",
+        createdBy: "Amanda Rodriguez",
+        updatedBy: "Robert Thompson",
+        createdDate: "2019-01-01",
+        updatedDate: "Dec 10, 2023"
       },
       {
         title: "TLAC Holdings Requirements",
@@ -107,7 +119,11 @@ export class MemStorage implements IStorage {
         lastUpdated: "Oct 15, 2023",
         relevanceScore: 78,
         keywords: ["tlac", "loss absorbing", "g-sib", "systemically important"],
-        fullText: "A global systemically important bank holding company must comply with total loss-absorbing capacity requirements. The minimum external TLAC amount must equal the greater of 18 percent of the company's risk-weighted assets or 6.75 percent of the company's total leverage exposure."
+        fullText: "A global systemically important bank holding company must comply with total loss-absorbing capacity requirements. The minimum external TLAC amount must equal the greater of 18 percent of the company's risk-weighted assets or 6.75 percent of the company's total leverage exposure.",
+        createdBy: "Lisa Zhang",
+        updatedBy: "Carlos Mendez",
+        createdDate: "2022-01-01",
+        updatedDate: "Oct 15, 2023"
       },
       {
         title: "Countercyclical Capital Buffer",
@@ -120,7 +136,11 @@ export class MemStorage implements IStorage {
         lastUpdated: "Dec 20, 2023",
         relevanceScore: 85,
         keywords: ["countercyclical", "buffer", "private sector", "credit exposures"],
-        fullText: "The countercyclical capital buffer is set at 0% for exposures to private sector credit in the United States for the four-quarter period beginning January 1, 2024. This buffer may be increased if systemic risks warrant additional capital protection."
+        fullText: "The countercyclical capital buffer is set at 0% for exposures to private sector credit in the United States for the four-quarter period beginning January 1, 2024. This buffer may be increased if systemic risks warrant additional capital protection.",
+        createdBy: "Thomas Anderson",
+        updatedBy: "Rachel Green",
+        createdDate: "2024-01-01",
+        updatedDate: "Dec 20, 2023"
       },
       {
         title: "Stress Testing Capital Planning",
@@ -133,7 +153,11 @@ export class MemStorage implements IStorage {
         lastUpdated: "Nov 30, 2023",
         relevanceScore: 90,
         keywords: ["stress testing", "capital planning", "scenarios", "adequacy"],
-        fullText: "A bank holding company with total consolidated assets of $100 billion or more must develop and maintain a capital plan that assesses the company's capital adequacy under baseline and stressed scenarios. The capital plan must include detailed projections of revenues, losses, reserves, and capital levels."
+        fullText: "A bank holding company with total consolidated assets of $100 billion or more must develop and maintain a capital plan that assesses the company's capital adequacy under baseline and stressed scenarios. The capital plan must include detailed projections of revenues, losses, reserves, and capital levels.",
+        createdBy: "Emily Johnson",
+        updatedBy: "Kevin Park",
+        createdDate: "2020-10-01",
+        updatedDate: "Nov 30, 2023"
       }
     ];
 

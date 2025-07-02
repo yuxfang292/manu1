@@ -188,16 +188,16 @@ export default function RegulatoryTable({
                   1
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-900">
-                  {extract.source}
+                  {extract.createdBy || 'Unknown'}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-500">
-                  {new Date(extract.lastUpdated).toLocaleDateString()}
+                  {extract.createdDate ? new Date(extract.createdDate).toLocaleDateString() : new Date(extract.lastUpdated).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-900">
-                  {extract.source}
+                  {extract.updatedBy || 'Unknown'}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-500">
-                  {new Date(extract.lastUpdated).toLocaleDateString()}
+                  {extract.updatedDate ? new Date(extract.updatedDate).toLocaleDateString() : new Date(extract.lastUpdated).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-3 text-sm text-center text-gray-900">
                   {Math.floor(Math.random() * 10) + 1}
