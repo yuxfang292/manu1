@@ -64,12 +64,6 @@ export default function Home() {
       case 'search':
         return (
           <div className="flex-1 flex flex-col">
-            <MainHeader
-              title="Regulatory Groups"
-              searchPlaceholder="Search RegGroup"
-              onSearch={handleSearch}
-              showCreateButton={true}
-            />
             <div className="flex-1">
               {searchQuery ? (
                 <div className="p-6">

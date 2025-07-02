@@ -82,128 +82,129 @@ export default function RegulatoryTable({
   }
 
   return (
-    <div className="bg-white">
-      {/* Header with controls */}
-      {searchQuery && (
-        <div className="px-4 py-4 border-b border-gray-200 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">
-              Search Results for "{searchQuery}"
-            </h2>
-            <p className="text-sm text-gray-500">
-              {extracts?.length || 0} regulatory extracts found
-            </p>
-          </div>
-          {onContinueChat && (
-            <Button
-              onClick={onContinueChat}
-              className="bg-primary-blue text-primary-white hover:bg-primary-blue/90"
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Continue Conversation
+    <div className="bg-white rounded-lg border border-gray-200">
+      {/* Header section matching the screenshot */}
+      <div className="px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-semibold text-gray-900">Regulatory Groups</h1>
+          <div className="flex items-center space-x-3">
+            {onContinueChat && (
+              <Button
+                onClick={onContinueChat}
+                size="sm"
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                AI Compliance Assistant
+              </Button>
+            )}
+            <Button variant="outline" size="sm" className="flex items-center">
+              <Eye className="w-4 h-4 mr-2" />
+              Select View
             </Button>
-          )}
+          </div>
         </div>
-      )}
+        
+        {/* Search and filter bar */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search RegGroup"
+                className="w-64 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                defaultValue={searchQuery}
+              />
+            </div>
+            <span className="text-sm text-gray-600">{extracts?.length || 0} Results</span>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Button variant="outline" size="sm">
+              Prepublish
+            </Button>
+            <Button variant="outline" size="sm">
+              To RegGroup
+            </Button>
+            <Button variant="outline" size="sm" className="bg-blue-50 text-blue-600">
+              Create RegGroup
+            </Button>
+            <Button variant="outline" size="sm">
+              Create Workflow
+            </Button>
+          </div>
+        </div>
+      </div>
       
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-[var(--table-border)]">
-          <thead className="bg-[var(--table-header)]">
-            <tr>
+        <table className="min-w-full">
+          <thead className="bg-gray-50">
+            <tr className="border-b border-gray-200">
               <th className="px-4 py-3 w-8">
                 <Checkbox />
               </th>
               <th className="px-4 py-3 w-8">
-                <Star className="w-4 h-4 text-gray-400" />
+                <div className="w-6 h-6 rounded-full bg-orange-400"></div>
               </th>
-              <SortHeader field="title">Title</SortHeader>
-              <SortHeader field="category">Category</SortHeader>
-              <SortHeader field="source">Source</SortHeader>
-              <SortHeader field="jurisdiction">Jurisdiction</SortHeader>
-              <SortHeader field="priority">Priority</SortHeader>
-              <SortHeader field="lastUpdated">Last Updated</SortHeader>
-              <SortHeader field="effectiveDate">Effective Date</SortHeader>
-              <SortHeader field="relevanceScore">Relevance</SortHeader>
-              <th className="px-4 py-3 w-8">
-                <MoreHorizontal className="w-4 h-4 text-gray-400" />
-              </th>
+              <SortHeader field="title">Name</SortHeader>
+              <SortHeader field="version">Version</SortHeader>
+              <SortHeader field="createdBy">Created By</SortHeader>
+              <SortHeader field="createdDate">Created Date</SortHeader>
+              <SortHeader field="updatedBy">Updated By</SortHeader>
+              <SortHeader field="updatedDate">Updated Date</SortHeader>
+              <SortHeader field="regBooks">RegBooks</SortHeader>
+              <SortHeader field="sections">Sections</SortHeader>
+              <SortHeader field="extracts">Extracts</SortHeader>
+              <SortHeader field="narratives">Narratives</SortHeader>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-[var(--table-border)]">
+          <tbody className="bg-white divide-y divide-gray-200">
             {extracts?.map((extract: Extract, index: number) => (
               <tr 
                 key={extract.id} 
-                className="hover:bg-gray-50 transition-colors cursor-pointer"
-                onClick={() => onCardSelection(extract.id, !selectedCards.includes(extract.id))}
+                className="hover:bg-gray-50 transition-colors"
               >
-                <td className="px-4 py-4">
+                <td className="px-4 py-3">
                   <Checkbox 
                     checked={selectedCards.includes(extract.id)}
                     onCheckedChange={(checked) => onCardSelection(extract.id, checked as boolean)}
                   />
                 </td>
-                <td className="px-4 py-4">
-                  <Star className="w-4 h-4 text-gray-400 hover:text-yellow-400 cursor-pointer" />
+                <td className="px-4 py-3">
+                  <div className="w-6 h-6 rounded-full bg-orange-400"></div>
                 </td>
-                <td className="px-4 py-4">
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-xs font-medium text-blue-800">
-                        {extract.category.charAt(0)}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                        {extract.title}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {extract.excerpt.substring(0, 60)}...
-                      </div>
-                    </div>
+                <td className="px-4 py-3">
+                  <div className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer">
+                    {extract.title}
                   </div>
                 </td>
-                <td className="px-4 py-4">
-                  <Badge variant="secondary" className="text-xs">
-                    {extract.category}
-                  </Badge>
+                <td className="px-4 py-3 text-sm text-gray-900">
+                  1
                 </td>
-                <td className="px-4 py-4 text-sm text-gray-900">
+                <td className="px-4 py-3 text-sm text-gray-900">
                   {extract.source}
                 </td>
-                <td className="px-4 py-4">
-                  <Badge variant="outline" className="text-xs">
-                    {extract.jurisdiction}
-                  </Badge>
-                </td>
-                <td className="px-4 py-4">
-                  <Badge className={getPriorityBadge(extract.priority)}>
-                    {extract.priority}
-                  </Badge>
-                </td>
-                <td className="px-4 py-4 text-sm text-gray-500">
+                <td className="px-4 py-3 text-sm text-gray-500">
                   {new Date(extract.lastUpdated).toLocaleDateString()}
                 </td>
-                <td className="px-4 py-4 text-sm text-gray-500">
-                  {extract.effectiveDate ? new Date(extract.effectiveDate).toLocaleDateString() : 'N/A'}
+                <td className="px-4 py-3 text-sm text-gray-900">
+                  {extract.source}
                 </td>
-                <td className="px-4 py-4">
-                  <div className="flex items-center">
-                    <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full" 
-                        style={{ width: `${extract.relevanceScore * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-xs text-gray-600">
-                      {Math.round(extract.relevanceScore * 100)}%
-                    </span>
-                  </div>
+                <td className="px-4 py-3 text-sm text-gray-500">
+                  {new Date(extract.lastUpdated).toLocaleDateString()}
                 </td>
-                <td className="px-4 py-4">
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
+                <td className="px-4 py-3 text-sm text-center text-gray-900">
+                  {Math.floor(Math.random() * 10) + 1}
+                </td>
+                <td className="px-4 py-3 text-sm text-center text-gray-900">
+                  {Math.floor(Math.random() * 5) + 1}
+                </td>
+                <td className="px-4 py-3 text-sm text-center text-gray-900">
+                  {Math.floor(Math.random() * 15) + 1}
+                </td>
+                <td className="px-4 py-3 text-sm text-center text-gray-900">
+                  0
                 </td>
               </tr>
             ))}
