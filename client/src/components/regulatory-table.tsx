@@ -8,7 +8,10 @@ import {
   MoreHorizontal,
   Star,
   Eye,
-  MessageCircle
+  MessageCircle,
+  AlertCircle,
+  CheckCircle,
+  Clock
 } from "lucide-react";
 import { useExtracts } from "@/hooks/use-extracts";
 import type { Extract } from "@shared/schema";
@@ -150,7 +153,7 @@ export default function RegulatoryTable({
                 <Checkbox />
               </th>
               <th className="px-4 py-3 w-8">
-                <div className="w-6 h-6 rounded-full bg-orange-400"></div>
+                Status
               </th>
               <SortHeader field="title">Name</SortHeader>
               <SortHeader field="version">Version</SortHeader>
@@ -177,7 +180,13 @@ export default function RegulatoryTable({
                   />
                 </td>
                 <td className="px-4 py-3">
-                  <div className="w-6 h-6 rounded-full bg-orange-400"></div>
+                  {extract.priority === "High Priority" ? (
+                    <AlertCircle className="w-5 h-5 text-red-500" />
+                  ) : extract.priority === "Medium" ? (
+                    <Clock className="w-5 h-5 text-yellow-500" />
+                  ) : (
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <div className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer">
