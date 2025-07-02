@@ -51,6 +51,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
   const [showFinalReportModal, setShowFinalReportModal] = useState(false);
   const [finalReportQuery, setFinalReportQuery] = useState<string>('');
   const [finalReportKeywords, setFinalReportKeywords] = useState<string[]>([]);
+  const [finalReportDocuments, setFinalReportDocuments] = useState<any[]>([]);
   const { toast } = useToast();
   const mcp = useMCP();
 
@@ -327,22 +328,36 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
 
   const handleFinalReport = (query: string) => {
     console.log('Looking for MCP data for query:', query);
-    console.log('All messages:', messages.map(m => ({ id: m.id, query: m.userQuery, hasMCP: !!m.mcpData })));
+    console.log('All messages:', messages.map(m => ({ id: m.id, role: m.role, query: m.userQuery, hasMCP: !!m.mcpData })));
     
-    // Find all messages with MCP data for this query to get keywords and documents
-    const mcpMessages = messages.filter(msg => 
-      msg.userQuery === query && msg.mcpData && 
-      (msg.mcpData.keywords || msg.mcpData.documents)
-    );
+    // Find the most recent set of step1 and step2 messages with MCP data
+    const recentMCPMessages = [];
     
-    console.log('Found MCP messages:', mcpMessages.length);
+    // Look for step1 and step2 messages in reverse order (most recent first)
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.id.includes('step1-') && msg.mcpData?.keywords) {
+        recentMCPMessages.push(msg);
+        break; // Found the most recent step1
+      }
+    }
+    
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.id.includes('step2-') && msg.mcpData?.documents) {
+        recentMCPMessages.push(msg);
+        break; // Found the most recent step2
+      }
+    }
+    
+    console.log('Found recent MCP messages:', recentMCPMessages.length);
     
     // Collect all keywords and documents from MCP results
     const allKeywords: string[] = [];
     const allDocuments: any[] = [];
     
-    mcpMessages.forEach(msg => {
-      console.log('Processing message:', msg.id, msg.mcpData);
+    recentMCPMessages.forEach(msg => {
+      console.log('Processing message:', msg.id, 'Keywords:', msg.mcpData?.keywords?.length, 'Documents:', msg.mcpData?.documents?.length);
       if (msg.mcpData?.keywords) {
         allKeywords.push(...msg.mcpData.keywords);
       }
@@ -351,16 +366,30 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
       }
     });
     
-    console.log('Found keywords:', allKeywords.length);
-    console.log('Found documents:', allDocuments.length);
+    // If no MCP keywords found, generate some default ones based on query
+    const defaultKeywords = query.toLowerCase().split(' ').filter(word => 
+      word.length > 3 && !['what', 'how', 'why', 'when', 'where', 'work'].includes(word)
+    );
+    
+    const finalKeywords = allKeywords.length > 0 ? allKeywords : [
+      ...defaultKeywords,
+      'regulatory compliance',
+      'financial regulation',
+      'banking requirements',
+      'risk management'
+    ];
+    
+    console.log('Final keywords:', finalKeywords.length, finalKeywords);
+    console.log('Final documents:', allDocuments.length, allDocuments);
     
     // Remove duplicates
-    const uniqueKeywords = allKeywords.filter((keyword, index) => 
-      allKeywords.indexOf(keyword) === index
+    const uniqueKeywords = finalKeywords.filter((keyword, index) => 
+      finalKeywords.indexOf(keyword) === index
     );
     
     setFinalReportQuery(query);
     setFinalReportKeywords(uniqueKeywords);
+    setFinalReportDocuments(allDocuments); // Pass the found documents
     setShowFinalReportModal(true);
   };
 
@@ -753,9 +782,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
         selectedCards={[]} // Will be populated from MCP documents
         keywords={finalReportKeywords}
         searchQuery={finalReportQuery}
-        mcpDocuments={messages.filter(msg => 
-          msg.userQuery === finalReportQuery && msg.mcpData?.documents
-        ).flatMap(msg => msg.mcpData?.documents || [])}
+        mcpDocuments={finalReportDocuments}
       />
     </Dialog>
   );

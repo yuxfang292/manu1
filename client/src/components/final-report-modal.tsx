@@ -215,30 +215,7 @@ export default function FinalReportModal({
         <ScrollArea className="max-h-[60vh] pr-4">
           <div className="space-y-6">
             
-            {/* Report Style Selection */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Settings className="w-4 h-4" />
-                <h3 className="font-semibold">Report Style</h3>
-              </div>
-              <Select value={reportStyle} onValueChange={setReportStyle}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select report style" />
-                </SelectTrigger>
-                <SelectContent>
-                  {reportStyles.map((style) => (
-                    <SelectItem key={style.value} value={style.value}>
-                      <div>
-                        <div className="font-medium">{style.label}</div>
-                        <div className="text-sm text-gray-500">{style.description}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
-            <Separator />
 
             {/* Modern Bubble Keywords Selection */}
             {keywords.length > 0 && (
