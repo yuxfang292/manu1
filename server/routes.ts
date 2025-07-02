@@ -64,38 +64,51 @@ async function executeResearchWorkflow(userQuery: string): Promise<string> {
       { style: 'comprehensive', length: 'detailed' }
     );
 
-    // Build research context for final response
-    const researchContext = `
-Research Analysis Complete:
+    // Build comprehensive research display for user
+    const keywordsDisplay = allKeywords.slice(0, 12).map(k => `\`${k}\``).join(', ');
+    const documentsDisplay = foundDocuments.slice(0, 8).map((doc, idx) => 
+      `${idx + 1}. **${doc.title || 'Regulatory Document'}** - ${doc.excerpt || doc.summary || 'Compliance analysis'}`
+    ).join('\n');
 
-**Keywords Found:** ${allKeywords.slice(0, 10).join(', ')}
+    const researchDisplay = `
+## 🔍 Research Process Complete
 
-**Documents Retrieved:** ${foundDocuments.length} relevant regulatory documents
-${foundDocuments.slice(0, 5).map((doc, idx) => `${idx + 1}. ${doc.title || 'Regulatory Document'}`).join('\n')}
+### **Step 1: Keywords Generated**
+${keywordsDisplay}
 
-**Research Summary:** ${summaryResult.result?.summary || 'Comprehensive analysis completed'}
+### **Step 2: Documents Found (${foundDocuments.length} total)**
+${documentsDisplay}
 
-**Quality Assessment:** ${qualityGood ? 'High relevance achieved' : 'Maximum search attempts completed'}
+### **Step 3: Quality Assessment**
+${qualityGood ? '✅ High relevance achieved' : '⚠️ Maximum search attempts completed'}
+
+### **Step 4: Comprehensive Analysis**
 `;
 
     // Generate final comprehensive response
     const response = await ai.models.generateContent({
       model: "gemini-2.5-pro",
-      contents: `You are CUBOT, an expert AI compliance assistant. Based on the comprehensive research conducted below, provide a detailed, well-structured answer to the user's question.
+      contents: `You are CUBOT, an expert AI compliance assistant. I have conducted comprehensive research using MCP functions. Present the research findings and provide a detailed answer.
 
-${researchContext}
+Research Data:
+- Keywords: ${allKeywords.join(', ')}
+- Documents: ${foundDocuments.length} regulatory documents found
+- Quality: ${qualityGood ? 'High relevance' : 'Standard coverage'}
 
 User Question: ${userQuery}
 
 Instructions:
+- Start your response with a brief summary of what research was conducted
 - Provide a comprehensive answer based on the research findings
 - Include specific regulatory references when available
 - Structure your response with clear sections and bullet points
-- Cite relevant documents or sources from the research
-- Make the response practical and actionable for banking professionals`,
+- Make the response practical and actionable for banking professionals
+- Be authoritative but acknowledge any limitations`,
     });
 
-    return response.text || "I apologize, but I couldn't generate a comprehensive response based on the research. Please try again.";
+    const finalResponse = researchDisplay + (response.text || "I apologize, but I couldn't generate a comprehensive response based on the research. Please try again.");
+    
+    return finalResponse;
 
   } catch (error) {
     console.error('Research workflow error:', error);

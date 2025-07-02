@@ -55,7 +55,8 @@ export class MCPService {
       {
         id: 'reg_001',
         title: 'Basel III Capital Requirements Update',
-        excerpt: 'Latest updates on minimum capital requirements for banks under Basel III framework...',
+        excerpt: 'Banking organizations must maintain minimum capital ratios: common equity tier 1 capital ratio of 4.5%, tier 1 capital ratio of 6.0%, and total capital ratio of 8.0%.',
+        content: 'Detailed framework for capital adequacy requirements under Basel III including buffer mechanisms, conservation measures, and supervisory review processes for internationally active banks.',
         source: 'BIS Regulatory Guidelines',
         relevanceScore: 0.95,
         lastUpdated: '2024-12-15'
@@ -63,7 +64,8 @@ export class MCPService {
       {
         id: 'reg_002', 
         title: 'Liquidity Coverage Ratio Implementation',
-        excerpt: 'Guidelines for implementing LCR requirements across different banking jurisdictions...',
+        excerpt: 'Banks must maintain sufficient high-quality liquid assets to survive a 30-day stressed funding scenario with LCR minimum of 100%.',
+        content: 'Comprehensive guidelines on calculating LCR including eligible HQLA categories, cash outflow calculations, and regulatory reporting requirements for liquidity risk management.',
         source: 'Federal Reserve Bulletin',
         relevanceScore: 0.88,
         lastUpdated: '2024-12-10'
@@ -71,10 +73,20 @@ export class MCPService {
       {
         id: 'reg_003',
         title: 'Stress Testing Methodologies',
-        excerpt: 'Comprehensive guide to stress testing frameworks for regulatory compliance...',
+        excerpt: 'Annual stress testing scenarios must include baseline, adverse, and severely adverse economic conditions with capital adequacy assessments.',
+        content: 'Detailed methodology for conducting bank stress tests including scenario design, capital projection models, risk-weighted asset calculations, and supervisory evaluation criteria.',
         source: 'ECB Banking Supervision',
         relevanceScore: 0.82,
         lastUpdated: '2024-12-08'
+      },
+      {
+        id: 'reg_004',
+        title: 'Operational Risk Management Framework',
+        excerpt: 'Standardised approach for operational risk capital requirements based on business indicator component and internal loss multiplier.',
+        content: 'Framework for identifying, assessing, monitoring and controlling operational risk including governance structures, risk appetite statements, and business continuity planning requirements.',
+        source: 'Basel Committee Guidelines',
+        relevanceScore: 0.79,
+        lastUpdated: '2024-12-05'
       }
     ];
 
@@ -83,6 +95,7 @@ export class MCPService {
       result: {
         query,
         totalResults: mockResults.length,
+        documents: mockResults, // Add documents key for backend compatibility
         results: mockResults,
         searchMetrics: {
           processingTime: '2.5s',
