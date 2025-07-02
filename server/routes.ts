@@ -64,28 +64,7 @@ async function executeResearchWorkflow(userQuery: string): Promise<string> {
       { style: 'comprehensive', length: 'detailed' }
     );
 
-    // Build comprehensive research display for user
-    const keywordsDisplay = allKeywords.slice(0, 12).map(k => `\`${k}\``).join(', ');
-    const documentsDisplay = foundDocuments.slice(0, 8).map((doc, idx) => 
-      `${idx + 1}. **${doc.title || 'Regulatory Document'}** - ${doc.excerpt || doc.summary || 'Compliance analysis'}`
-    ).join('\n');
-
-    const researchDisplay = `
-## 🔍 Research Process Complete
-
-### **Step 1: Keywords Generated**
-${keywordsDisplay}
-
-### **Step 2: Documents Found (${foundDocuments.length} total)**
-${documentsDisplay}
-
-### **Step 3: Quality Assessment**
-${qualityGood ? '✅ High relevance achieved' : '⚠️ Maximum search attempts completed'}
-
-### **Step 4: Comprehensive Analysis**
-`;
-
-    // Generate final comprehensive response
+    // Generate final comprehensive response (frontend handles step display)
     const response = await ai.models.generateContent({
       model: "gemini-2.5-pro",
       contents: `You are CUBOT, an expert AI compliance assistant. I have conducted comprehensive research using MCP functions. Present the research findings and provide a detailed answer.
@@ -106,9 +85,8 @@ Instructions:
 - Be authoritative but acknowledge any limitations`,
     });
 
-    const finalResponse = researchDisplay + (response.text || "I apologize, but I couldn't generate a comprehensive response based on the research. Please try again.");
-    
-    return finalResponse;
+    // Return only the AI response - frontend already shows steps 1 & 2
+    return response.text || "I apologize, but I couldn't generate a comprehensive response based on the research. Please try again.";
 
   } catch (error) {
     console.error('Research workflow error:', error);
