@@ -25,7 +25,6 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
     { id: 'dashboard', label: 'RegDashboard', icon: LayoutDashboard },
     { id: 'trend', label: 'RegTrend', icon: TrendingUp },
     { id: 'search', label: 'RegSearch', icon: Search, active: true },
-    { id: 'explorer', label: 'Compliance Explorer', icon: Search },
     { id: 'group', label: 'RegGroup', icon: BarChart3 },
     { id: 'flow', label: 'RegFlow', icon: FileText },
     { id: 'map', label: 'RegMap', icon: LayoutDashboard },
