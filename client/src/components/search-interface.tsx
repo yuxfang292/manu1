@@ -19,6 +19,7 @@ import AIChatModal from "./ai-chat-modal";
 interface SearchInterfaceProps {
   onSearch: (query: string) => void;
   onExploreCategory: (category: string) => void;
+  onGenerateSummary?: () => void;
 }
 
 export default function SearchInterface({ onSearch, onExploreCategory }: SearchInterfaceProps) {

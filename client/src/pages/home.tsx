@@ -45,6 +45,14 @@ export default function Home() {
     }
   };
 
+  const handleAIChatSummary = () => {
+    // For AI chat summary, we'll create a mock selection of relevant extracts
+    // In a real implementation, this would be based on the actual chat content
+    const mockSelectedCards = [1, 2, 3]; // Mock selection based on chat queries
+    setSelectedCards(mockSelectedCards);
+    setShowSummaryModal(true);
+  };
+
   const renderMainContent = () => {
     switch (currentView) {
       case 'search':
@@ -70,6 +78,7 @@ export default function Home() {
                 <SearchInterface
                   onSearch={handleSearch}
                   onExploreCategory={handleSearch}
+                  onGenerateSummary={handleAIChatSummary}
                 />
               )}
             </div>

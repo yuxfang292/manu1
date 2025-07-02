@@ -20,9 +20,10 @@ interface AIChatModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSearch?: (query: string) => void;
+  onGenerateSummary?: () => void;
 }
 
-export default function AIChatModal({ isOpen, onClose, onSearch }: AIChatModalProps) {
+export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSummary }: AIChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -33,6 +34,8 @@ export default function AIChatModal({ isOpen, onClose, onSearch }: AIChatModalPr
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showSessionComplete, setShowSessionComplete] = useState(false);
+  const [completedQueries, setCompletedQueries] = useState<string[]>([]);
   const { toast } = useToast();
 
   const exampleQuestions = [
@@ -116,21 +119,53 @@ export default function AIChatModal({ isOpen, onClose, onSearch }: AIChatModalPr
   };
 
   const handleMarkDone = (messageId: string) => {
+    const message = messages.find(msg => msg.id === messageId);
+    if (message?.userQuery) {
+      setCompletedQueries(prev => [...prev, message.userQuery!]);
+    }
+
     setMessages(prev => prev.map(msg => 
       msg.id === messageId 
         ? { ...msg, showActionButtons: false }
         : msg
     ));
     
-    // Add a system message confirming the query is complete
-    const doneMessage: Message = {
-      id: Date.now().toString(),
-      role: 'system',
-      content: 'Query marked as complete. Feel free to ask another question!',
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, doneMessage]);
+    // Check if user has completed multiple queries to show session completion options
+    const newCompletedCount = completedQueries.length + 1;
+    if (newCompletedCount >= 2) {
+      setShowSessionComplete(true);
+    } else {
+      // Add a system message confirming the query is complete
+      const doneMessage: Message = {
+        id: Date.now().toString(),
+        role: 'system',
+        content: 'Query marked as complete. Feel free to ask another question!',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, doneMessage]);
+    }
+  };
+
+  const handleGenerateSummary = () => {
+    if (onGenerateSummary) {
+      onGenerateSummary();
+    }
+    onClose();
+  };
+
+  const handleRestartSession = () => {
+    setMessages([
+      {
+        id: '1',
+        role: 'assistant',
+        content: 'Hello! I\'m your AI Compliance Assistant. I can help you with questions about regulatory requirements, capital ratios, compliance deadlines, and more. What would you like to know?',
+        timestamp: new Date()
+      }
+    ]);
+    setCompletedQueries([]);
+    setShowSessionComplete(false);
+    setInput('');
   };
 
   return (
@@ -250,24 +285,72 @@ export default function AIChatModal({ isOpen, onClose, onSearch }: AIChatModalPr
             </div>
           )}
 
+          {/* Session Completion Options */}
+          {showSessionComplete && (
+            <div className="border rounded-lg p-6 bg-gradient-to-r from-blue-50 to-green-50">
+              <div className="text-center space-y-4">
+                <div className="flex items-center justify-center space-x-2">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">Session Complete</h3>
+                </div>
+                
+                <p className="text-gray-600">
+                  You've completed {completedQueries.length} queries in this session. Would you like to generate a research summary or start a new session?
+                </p>
+                
+                <div className="flex items-center justify-center space-x-3 pt-2">
+                  <Button
+                    onClick={handleGenerateSummary}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Generate Summary
+                  </Button>
+                  
+                  <Button
+                    onClick={handleRestartSession}
+                    variant="outline"
+                    className="border-gray-300"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Start New Session
+                  </Button>
+                </div>
+                
+                <div className="text-xs text-gray-500 pt-2">
+                  <p>Your completed queries:</p>
+                  <div className="flex flex-wrap gap-1 mt-1 justify-center">
+                    {completedQueries.map((query, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {query.length > 30 ? `${query.substring(0, 30)}...` : query}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Input Area */}
-          <div className="flex space-x-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask about compliance requirements, deadlines, or regulations..."
-              disabled={isLoading}
-              className="flex-1"
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!input.trim() || isLoading}
-              size="icon"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
+          {!showSessionComplete && (
+            <div className="flex space-x-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask about compliance requirements, deadlines, or regulations..."
+                disabled={isLoading}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={!input.trim() || isLoading}
+                size="icon"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
