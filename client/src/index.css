@@ -24,8 +24,18 @@
   --ring: hsl(210, 11%, 15%);
   --radius: 0.5rem;
   
-  /* Custom color palette */
-  --primary-blue: hsl(197, 100%, 38%);
+  /* Dashboard color palette matching the screenshot */
+  --sidebar-bg: hsl(224, 28%, 21%);
+  --sidebar-text: hsl(0, 0%, 85%);
+  --sidebar-text-muted: hsl(0, 0%, 65%);
+  --sidebar-active: hsl(217, 91%, 60%);
+  --main-bg: hsl(0, 0%, 98%);
+  --header-bg: hsl(0, 0%, 100%);
+  --table-header: hsl(210, 16%, 98%);
+  --table-border: hsl(220, 13%, 91%);
+  
+  /* Legacy color palette for backward compatibility */
+  --primary-blue: hsl(217, 91%, 60%);
   --accent-blue: hsl(196, 44%, 68%);
   --supporting-blue: hsl(197, 32%, 91%);
   --primary-grey: hsl(0, 0%, 78%);
@@ -64,8 +74,9 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Verdana', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     font-weight: 400;
+    background-color: var(--main-bg);
   }
 }
 
