@@ -318,7 +318,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
               <img 
                 src={cubotIcon} 
                 alt="CUBOT AI Assistant" 
-                className="w-6 h-6" 
+                className="w-6 h-6 object-contain" 
               />
             </div>
             <span>CUBOT</span>
@@ -355,14 +355,14 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                             <img 
                               src={cubotIcon} 
                               alt="CUBOT AI Assistant" 
-                              className="w-4 h-4" 
+                              className="w-4 h-4 object-contain" 
                             />
                           </div>
                         ) : (
                           <img 
                             src={cubotIcon} 
                             alt="CUBOT AI Assistant" 
-                            className="w-4 h-4" 
+                            className="w-4 h-4 object-contain" 
                           />
                         )}
                       </div>

@@ -101,7 +101,7 @@ export default function RegulatoryTable({
                 <img 
                   src={cubotIcon} 
                   alt="CUBOT AI Assistant" 
-                  className="w-5 h-5 mr-2" 
+                  className="w-5 h-5 mr-2 object-contain" 
                 />
                 Ask CUBOT
               </Button>
