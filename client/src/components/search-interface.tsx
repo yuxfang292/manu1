@@ -14,6 +14,7 @@ import {
   Eye,
   Lock
 } from "lucide-react";
+import AIChatModal from "./ai-chat-modal";
 
 interface SearchInterfaceProps {
   onSearch: (query: string) => void;
@@ -23,6 +24,7 @@ interface SearchInterfaceProps {
 export default function SearchInterface({ onSearch, onExploreCategory }: SearchInterfaceProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,7 +177,11 @@ export default function SearchInterface({ onSearch, onExploreCategory }: SearchI
               Get intelligent insights and recommendations for your regulatory compliance needs. 
               Ask about specific requirements, deadlines, or compliance strategies.
             </p>
-            <Button variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-50">
+            <Button 
+              variant="outline" 
+              className="text-blue-600 border-blue-600 hover:bg-blue-50"
+              onClick={() => setIsChatModalOpen(true)}
+            >
               Ask AI Assistant
             </Button>
           </div>

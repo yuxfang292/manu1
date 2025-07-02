@@ -1,0 +1,210 @@
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Send, Bot, User, Sparkles } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
+
+interface AIChatModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      role: 'assistant',
+      content: 'Hello! I\'m your AI Compliance Assistant. I can help you with questions about regulatory requirements, capital ratios, compliance deadlines, and more. What would you like to know?',
+      timestamp: new Date()
+    }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const exampleQuestions = [
+    "What are the capital requirements for my banking group?",
+    "Tell me about Basel III minimum ratios",
+    "What are the GDPR requirements for financial services?",
+    "When are the next stress testing deadlines?",
+    "How do liquidity coverage ratios work?"
+  ];
+
+  const handleSendMessage = async () => {
+    if (!input.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input.trim(),
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input.trim(),
+          history: messages.slice(-5) // Send last 5 messages for context
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI response');
+      }
+
+      const data = await response.json();
+      
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: data.response,
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const handleExampleClick = (question: string) => {
+    setInput(question);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-2">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Bot className="w-5 h-5 text-blue-600" />
+            </div>
+            <span>AI Compliance Assistant</span>
+          </DialogTitle>
+          <DialogDescription>
+            Ask questions about regulatory requirements, compliance deadlines, and banking regulations.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex-1 flex flex-col space-y-4">
+          {/* Messages Area */}
+          <ScrollArea className="flex-1 border rounded-lg p-4">
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`max-w-[80%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
+                    <div className={`flex items-start space-x-2 ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                      <div className={`p-2 rounded-full ${message.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                        {message.role === 'user' ? (
+                          <User className="w-4 h-4 text-blue-600" />
+                        ) : (
+                          <Bot className="w-4 h-4 text-gray-600" />
+                        )}
+                      </div>
+                      <div className={`p-3 rounded-lg ${message.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        <p className={`text-xs mt-1 opacity-70`}>
+                          {message.timestamp.toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="max-w-[80%]">
+                    <div className="flex items-start space-x-2">
+                      <div className="p-2 rounded-full bg-gray-100">
+                        <Bot className="w-4 h-4 text-gray-600" />
+                      </div>
+                      <div className="p-3 rounded-lg bg-gray-100">
+                        <div className="flex items-center space-x-2">
+                          <Sparkles className="w-4 h-4 animate-pulse text-blue-600" />
+                          <span className="text-sm text-gray-600">Thinking...</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+
+          {/* Example Questions */}
+          {messages.length === 1 && (
+            <div className="border rounded-lg p-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-3">Try asking:</h4>
+              <div className="flex flex-wrap gap-2">
+                {exampleQuestions.map((question, index) => (
+                  <Badge
+                    key={index}
+                    variant="outline"
+                    className="cursor-pointer hover:bg-blue-50 hover:border-blue-300 text-xs p-2"
+                    onClick={() => handleExampleClick(question)}
+                  >
+                    {question}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Input Area */}
+          <div className="flex space-x-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask about compliance requirements, deadlines, or regulations..."
+              disabled={isLoading}
+              className="flex-1"
+            />
+            <Button
+              onClick={handleSendMessage}
+              disabled={!input.trim() || isLoading}
+              size="icon"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
