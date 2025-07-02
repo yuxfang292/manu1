@@ -92,10 +92,14 @@ export default function RegulatoryTable({
               <Button
                 onClick={onContinueChat}
                 size="sm"
-                className="bg-blue-600 text-white hover:bg-blue-700"
+                className="bg-blue-600 text-white hover:bg-blue-700 px-3 py-2"
               >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                AI Compliance Assistant
+                <img 
+                  src="/attached_assets/image_1751471154349.png" 
+                  alt="AI Bot" 
+                  className="w-5 h-5 mr-2" 
+                />
+                Ask AI Assistant
               </Button>
             )}
             <Button variant="outline" size="sm" className="flex items-center">

@@ -162,7 +162,11 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <Bot className="w-5 h-5 text-blue-600" />
+              <img 
+                src="/attached_assets/image_1751471154349.png" 
+                alt="AI Bot" 
+                className="w-5 h-5" 
+              />
             </div>
             <span>AI Compliance Assistant</span>
           </DialogTitle>
@@ -191,7 +195,11 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                         ) : message.role === 'system' ? (
                           <CheckCircle className="w-4 h-4 text-green-600" />
                         ) : (
-                          <Bot className="w-4 h-4 text-gray-600" />
+                          <img 
+                            src="/attached_assets/image_1751471154349.png" 
+                            alt="AI Bot" 
+                            className="w-4 h-4" 
+                          />
                         )}
                       </div>
                       <div className="flex flex-col space-y-2">
