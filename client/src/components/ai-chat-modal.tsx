@@ -130,20 +130,20 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
         : msg
     ));
     
+    // Add a system message confirming the query is complete
+    const doneMessage: Message = {
+      id: Date.now().toString(),
+      role: 'system',
+      content: 'Query marked as complete. Feel free to ask another question!',
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, doneMessage]);
+
     // Check if user has completed multiple queries to show session completion options
     const newCompletedCount = completedQueries.length + 1;
     if (newCompletedCount >= 2) {
       setShowSessionComplete(true);
-    } else {
-      // Add a system message confirming the query is complete
-      const doneMessage: Message = {
-        id: Date.now().toString(),
-        role: 'system',
-        content: 'Query marked as complete. Feel free to ask another question!',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, doneMessage]);
     }
   };
 
@@ -305,6 +305,15 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                   >
                     <FileText className="w-4 h-4 mr-2" />
                     Generate Summary
+                  </Button>
+                  
+                  <Button
+                    onClick={() => setShowSessionComplete(false)}
+                    variant="outline"
+                    className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    Continue Session
                   </Button>
                   
                   <Button
