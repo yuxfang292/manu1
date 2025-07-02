@@ -249,6 +249,11 @@ export default function SearchInterface({ onSearch, onExploreCategory }: SearchI
           </div>
         </div>
       </div>
+
+      <AIChatModal 
+        isOpen={isChatModalOpen}
+        onClose={() => setIsChatModalOpen(false)}
+      />
     </div>
   );
 }
