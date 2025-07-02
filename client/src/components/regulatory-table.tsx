@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -42,8 +43,8 @@ export default function RegulatoryTable({
   const [sortField, setSortField] = useState<string>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [isEnhancedChatOpen, setIsEnhancedChatOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMode, setChatMode] = useState<'chat' | 'research'>('chat');
 
   const { data: extracts, isLoading } = useExtracts(searchQuery, filters);
 
@@ -102,26 +103,33 @@ export default function RegulatoryTable({
           <h1 className="text-xl font-semibold text-gray-900">Regulatory Groups</h1>
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
+              <Select value={chatMode} onValueChange={(value: 'chat' | 'research') => setChatMode(value)}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="chat">Quick Chat</SelectItem>
+                  <SelectItem value="research">Research Mode</SelectItem>
+                </SelectContent>
+              </Select>
               <Button
                 onClick={() => setIsChatOpen(true)}
                 size="sm"
-                variant="outline"
-                className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2"
               >
                 <img 
                   src={cubotIcon} 
                   alt="CUBOT AI Assistant" 
                   className="w-5 h-5 mr-2 object-contain" 
                 />
-                Quick Chat
-              </Button>
-              <Button
-                onClick={() => setIsEnhancedChatOpen(true)}
-                size="sm"
-                className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Enhanced Workflow
+                {chatMode === 'research' ? (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-1" />
+                    CUBOT Research
+                  </>
+                ) : (
+                  'CUBOT Chat'
+                )}
               </Button>
             </div>
             <Button variant="outline" size="sm" className="flex items-center">
@@ -261,19 +269,20 @@ export default function RegulatoryTable({
         </div>
       </div>
 
-      {/* Original AI Chat Modal */}
-      <AIChatModal
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        onSearch={onSearch}
-        onGenerateSummary={onGenerateSummary}
-      />
-
-      {/* Enhanced AI Chat Workspace */}
-      <EnhancedChatWorkspace
-        isOpen={isEnhancedChatOpen}
-        onClose={() => setIsEnhancedChatOpen(false)}
-      />
+      {/* AI Chat - Mode-based rendering */}
+      {chatMode === 'research' ? (
+        <EnhancedChatWorkspace
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+        />
+      ) : (
+        <AIChatModal
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          onSearch={onSearch}
+          onGenerateSummary={onGenerateSummary}
+        />
+      )}
     </div>
   );
 }
