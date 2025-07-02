@@ -434,12 +434,18 @@ User question: ${message}`,
   // Final Report generation endpoint
   app.post('/api/reports/generate', async (req, res) => {
     try {
+      console.log('Report generation request:', req.body);
       const { mcpDocuments, keywords, style, searchQuery } = req.body;
       
       // Use MCP documents directly from research
       const documents = mcpDocuments || [];
 
+      console.log('Documents count:', documents.length);
+      console.log('Keywords count:', keywords?.length || 0);
+      console.log('Style:', style);
+
       if (documents.length === 0) {
+        console.log('No documents found, returning error');
         return res.status(400).json({ error: 'No research documents found' });
       }
 

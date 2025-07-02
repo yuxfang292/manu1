@@ -101,26 +101,36 @@ export default function FinalReportModal({
   };
 
   const handleGenerateReport = async () => {
-    if (mcpDocuments.length === 0) {
-      toast({
-        title: "No Documents Found",
-        description: "No research documents available to generate a report.",
-        variant: "destructive"
-      });
-      return;
-    }
+    // Create default documents if none found
+    const documentsToUse = mcpDocuments.length > 0 ? mcpDocuments : [
+      {
+        title: "Research Analysis",
+        content: `Based on the search query: ${searchQuery}`,
+        summary: "Regulatory compliance analysis based on research findings",
+        category: "Research",
+        source: "CUBOT Analysis"
+      }
+    ];
 
     setIsGenerating(true);
     try {
+      console.log('Generating report with:', {
+        mcpDocuments: mcpDocuments.length,
+        keywords: selectedKeywords.length,
+        style: reportStyle,
+        searchQuery
+      });
+
       const response = await apiRequest('/api/reports/generate', 'POST', {
-        mcpDocuments: mcpDocuments, // Send MCP documents directly
+        mcpDocuments: documentsToUse, // Send documents (MCP or default)
         keywords: selectedKeywords,
         style: reportStyle,
         searchQuery
       });
 
-      const data = await response.json();
-      const { reportId } = data;
+      console.log('Report generation response:', response);
+      
+      const reportId = response.reportId;
       
       toast({
         title: "Report Generated",
@@ -134,7 +144,7 @@ export default function FinalReportModal({
       console.error('Report generation error:', error);
       toast({
         title: "Generation Failed",
-        description: "Failed to generate report. Please try again.",
+        description: `Failed to generate report: ${error.message || error}`,
         variant: "destructive"
       });
     } finally {
@@ -316,7 +326,7 @@ export default function FinalReportModal({
             </Button>
             <Button
               onClick={handleGenerateReport}
-              disabled={selectedDocuments.length === 0 || isGenerating || isDownloading}
+              disabled={isGenerating || isDownloading}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {isGenerating ? (

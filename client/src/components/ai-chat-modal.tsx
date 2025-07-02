@@ -326,17 +326,23 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
   }
 
   const handleFinalReport = (query: string) => {
+    console.log('Looking for MCP data for query:', query);
+    console.log('All messages:', messages.map(m => ({ id: m.id, query: m.userQuery, hasMCP: !!m.mcpData })));
+    
     // Find all messages with MCP data for this query to get keywords and documents
     const mcpMessages = messages.filter(msg => 
       msg.userQuery === query && msg.mcpData && 
       (msg.mcpData.keywords || msg.mcpData.documents)
     );
     
+    console.log('Found MCP messages:', mcpMessages.length);
+    
     // Collect all keywords and documents from MCP results
     const allKeywords: string[] = [];
     const allDocuments: any[] = [];
     
     mcpMessages.forEach(msg => {
+      console.log('Processing message:', msg.id, msg.mcpData);
       if (msg.mcpData?.keywords) {
         allKeywords.push(...msg.mcpData.keywords);
       }
@@ -344,6 +350,9 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
         allDocuments.push(...msg.mcpData.documents);
       }
     });
+    
+    console.log('Found keywords:', allKeywords.length);
+    console.log('Found documents:', allDocuments.length);
     
     // Remove duplicates
     const uniqueKeywords = allKeywords.filter((keyword, index) => 
@@ -576,15 +585,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                               <Search className="w-3 h-3 mr-1" />
                               Show Related Results
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleFinalReport(message.userQuery!)}
-                              className="text-xs"
-                            >
-                              <FileText className="w-3 h-3 mr-1" />
-                              Final Report
-                            </Button>
+
                             <Button
                               size="sm"
                               variant="outline"
@@ -654,12 +655,18 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                 
                 <div className="flex items-center space-x-2">
                   <Button
-                    onClick={handleGenerateSummary}
+                    onClick={() => {
+                      // Get the most recent query data for Final Report
+                      const lastQuery = completedQueries[completedQueries.length - 1];
+                      if (lastQuery) {
+                        handleFinalReport(lastQuery);
+                      }
+                    }}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                     size="sm"
                   >
                     <FileText className="w-4 h-4 mr-1" />
-                    Generate Summary
+                    Final Report
                   </Button>
                   
                   <Button
