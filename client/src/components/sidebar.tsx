@@ -44,9 +44,8 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
       <div className="p-4 border-b border-gray-600/20">
         <div className="flex items-center justify-between">
           {!collapsed && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center justify-center w-full">
               <CubeLogo />
-              <span className="font-semibold text-white">CUBE RegPlatform</span>
             </div>
           )}
           {collapsed && (

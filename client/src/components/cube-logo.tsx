@@ -1,11 +1,11 @@
+import logoPath from "@assets/white_regplatform_1751466841754.png";
+
 export default function CubeLogo() {
   return (
-    <div className="cube-logo">
-      <div className="cube-face cube-front"></div>
-      <div className="cube-face cube-right"></div>
-      <div className="cube-face cube-left"></div>
-      <div className="cube-face cube-top"></div>
-      <div className="cube-face cube-bottom"></div>
-    </div>
+    <img 
+      src={logoPath} 
+      alt="RegPlatform" 
+      className="h-8 w-auto"
+    />
   );
 }
