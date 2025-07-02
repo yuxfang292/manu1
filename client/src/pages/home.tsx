@@ -65,23 +65,13 @@ export default function Home() {
         return (
           <div className="flex-1 flex flex-col">
             <div className="flex-1">
-              {searchQuery ? (
-                <div className="p-6">
-                  <RegulatoryTable
-                    searchQuery={searchQuery}
-                    filters={filters}
-                    selectedCards={selectedCards}
-                    onCardSelection={handleCardSelection}
-                    onContinueChat={handleContinueChat}
-                  />
-                </div>
-              ) : (
-                <SearchInterface
-                  onSearch={handleSearch}
-                  onExploreCategory={handleSearch}
-                  onGenerateSummary={handleAIChatSummary}
-                />
-              )}
+              <RegulatoryTable
+                searchQuery={searchQuery}
+                filters={filters}
+                selectedCards={selectedCards}
+                onCardSelection={handleCardSelection}
+                onContinueChat={() => setShowAIChatModal(true)}
+              />
             </div>
           </div>
         );

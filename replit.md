@@ -110,7 +110,10 @@ This is a full-stack web application built for compliance and regulatory change 
 4. Single deployment artifact with both frontend and backend
 
 ## Changelog
-- July 02, 2025. Initial setup
+- July 02, 2025: Initial setup
+- July 02, 2025: Replaced Claude API with Gemini 2.5 Pro for AI Assistant
+- July 02, 2025: Updated landing page to show regulatory groups table by default
+- July 02, 2025: Added AI chatbot button in top right corner of regulatory table header
 
 ## User Preferences
 
