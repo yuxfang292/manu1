@@ -5,11 +5,13 @@ import RegulatoryTable from "@/components/regulatory-table";
 import ChatInterface from "@/components/chat-interface";
 import SearchInterface from "@/components/search-interface";
 import SummaryModal from "@/components/summary-modal";
+import AIChatModal from "@/components/ai-chat-modal";
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<string>('search');
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [showAIChatModal, setShowAIChatModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filters, setFilters] = useState<{
     categories: string[];
@@ -53,6 +55,10 @@ export default function Home() {
     setShowSummaryModal(true);
   };
 
+  const handleContinueChat = () => {
+    setShowAIChatModal(true);
+  };
+
   const renderMainContent = () => {
     switch (currentView) {
       case 'search':
@@ -72,6 +78,7 @@ export default function Home() {
                     filters={filters}
                     selectedCards={selectedCards}
                     onCardSelection={handleCardSelection}
+                    onContinueChat={handleContinueChat}
                   />
                 </div>
               ) : (
@@ -134,6 +141,14 @@ export default function Home() {
         isOpen={showSummaryModal}
         onClose={() => setShowSummaryModal(false)}
         selectedCards={selectedCards}
+      />
+
+      {/* AI Chat Modal */}
+      <AIChatModal
+        isOpen={showAIChatModal}
+        onClose={() => setShowAIChatModal(false)}
+        onSearch={handleSearch}
+        onGenerateSummary={handleAIChatSummary}
       />
     </div>
   );
