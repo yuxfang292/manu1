@@ -18,8 +18,7 @@ import {
 import { useExtracts } from "@/hooks/use-extracts";
 import type { Extract } from "@shared/schema";
 import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
-import EnhancedChatWorkspace from "@/components/enhanced-chat-workspace";
-import AIChatModal from "@/components/ai-chat-modal";
+import UnifiedChatModal from "@/components/unified-chat-modal";
 
 interface RegulatoryTableProps {
   searchQuery?: string;
@@ -44,7 +43,6 @@ export default function RegulatoryTable({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatMode, setChatMode] = useState<'chat' | 'research'>('chat');
 
   const { data: extracts, isLoading } = useExtracts(searchQuery, filters);
 
@@ -103,15 +101,6 @@ export default function RegulatoryTable({
           <h1 className="text-xl font-semibold text-gray-900">Regulatory Groups</h1>
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <Select value={chatMode} onValueChange={(value: 'chat' | 'research') => setChatMode(value)}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="chat">Quick Chat</SelectItem>
-                  <SelectItem value="research">Research Mode</SelectItem>
-                </SelectContent>
-              </Select>
               <Button
                 onClick={() => setIsChatOpen(true)}
                 size="sm"
@@ -122,14 +111,7 @@ export default function RegulatoryTable({
                   alt="CUBOT AI Assistant" 
                   className="w-5 h-5 mr-2 object-contain" 
                 />
-                {chatMode === 'research' ? (
-                  <>
-                    <Sparkles className="w-4 h-4 mr-1" />
-                    CUBOT Research
-                  </>
-                ) : (
-                  'CUBOT Chat'
-                )}
+                CUBOT AI Assistant
               </Button>
             </div>
             <Button variant="outline" size="sm" className="flex items-center">
@@ -269,20 +251,13 @@ export default function RegulatoryTable({
         </div>
       </div>
 
-      {/* AI Chat - Mode-based rendering */}
-      {chatMode === 'research' ? (
-        <EnhancedChatWorkspace
-          isOpen={isChatOpen}
-          onClose={() => setIsChatOpen(false)}
-        />
-      ) : (
-        <AIChatModal
-          isOpen={isChatOpen}
-          onClose={() => setIsChatOpen(false)}
-          onSearch={onSearch}
-          onGenerateSummary={onGenerateSummary}
-        />
-      )}
+      {/* Unified AI Chat Modal */}
+      <UnifiedChatModal
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        onSearch={onSearch}
+        onGenerateSummary={onGenerateSummary}
+      />
     </div>
   );
 }
