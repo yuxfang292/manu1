@@ -130,7 +130,7 @@ export default function DataCards({
             className="bg-accent-blue text-primary-black hover:bg-accent-blue/80"
           >
             <FileText className="w-4 h-4 mr-1" />
-            Generate Summary ({selectedCards.length} selected)
+            Final Report ({selectedCards.length} selected)
           </Button>
         </div>
       </div>
