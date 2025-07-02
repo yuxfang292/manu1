@@ -100,7 +100,7 @@ export default function RegulatoryTable({
                   alt="CUBOT AI Assistant" 
                   className="w-5 h-5 mr-2" 
                 />
-                Ask AI Assistant
+                Ask CUBOT
               </Button>
             )}
             <Button variant="outline" size="sm" className="flex items-center">

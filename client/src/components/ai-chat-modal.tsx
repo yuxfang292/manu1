@@ -34,7 +34,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
     {
       id: '1',
       role: 'assistant',
-      content: 'Hello! I\'m your AI Compliance Assistant. I can help you with questions about regulatory requirements, capital ratios, compliance deadlines, and more. What would you like to know?',
+      content: 'Hello! I\'m CUBOT, your AI compliance assistant. I can help you with questions about regulatory requirements, capital ratios, compliance deadlines, and more. What would you like to know?',
       timestamp: new Date()
     }
   ]);
@@ -265,7 +265,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
       {
         id: '1',
         role: 'assistant',
-        content: 'Hello! I\'m your AI Compliance Assistant. I can help you with questions about regulatory requirements, capital ratios, compliance deadlines, and more. What would you like to know?',
+        content: 'Hello! I\'m CUBOT, your AI compliance assistant. I can help you with questions about regulatory requirements, capital ratios, compliance deadlines, and more. What would you like to know?',
         timestamp: new Date()
       }
     ]);
@@ -286,7 +286,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                 className="w-5 h-5" 
               />
             </div>
-            <span>AI Compliance Assistant</span>
+            <span>CUBOT</span>
           </DialogTitle>
           <DialogDescription>
             Ask questions about regulatory requirements, compliance deadlines, and banking regulations.

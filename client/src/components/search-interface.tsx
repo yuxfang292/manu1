@@ -173,7 +173,7 @@ export default function SearchInterface({ onSearch, onExploreCategory, onGenerat
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1">
-            <h3 className="font-medium text-gray-900 mb-2">AI Compliance Assistant</h3>
+            <h3 className="font-medium text-gray-900 mb-2">CUBOT Compliance Assistant</h3>
             <p className="text-gray-600 mb-3">
               Get intelligent insights and recommendations for your regulatory compliance needs. 
               Ask about specific requirements, deadlines, or compliance strategies.
@@ -183,7 +183,7 @@ export default function SearchInterface({ onSearch, onExploreCategory, onGenerat
               className="text-blue-600 border-blue-600 hover:bg-blue-50"
               onClick={() => setIsChatModalOpen(true)}
             >
-              Ask AI Assistant
+              Ask CUBOT
             </Button>
           </div>
         </div>

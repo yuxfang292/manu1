@@ -114,6 +114,8 @@ This is a full-stack web application built for compliance and regulatory change 
 - July 02, 2025: Replaced Claude API with Gemini 2.5 Pro for AI Assistant
 - July 02, 2025: Updated landing page to show regulatory groups table by default
 - July 02, 2025: Added AI chatbot button in top right corner of regulatory table header
+- July 02, 2025: Implemented MCP (Model Context Protocol) integration with four functions
+- July 02, 2025: Replaced all "AI Assistant" references with "CUBOT" branding
 
 ## User Preferences
 
