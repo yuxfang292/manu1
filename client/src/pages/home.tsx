@@ -58,43 +58,51 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background-grey">
-      {/* Header */}
-      <header className="bg-primary-white shadow-md border-b border-secondary-grey">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+    <div className="min-h-screen bg-gradient-to-br from-background-grey to-supporting-blue/30">
+      {/* Enhanced Header */}
+      <header className="bg-primary-white/90 backdrop-blur-md shadow-xl border-b-2 border-primary-blue/20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-blue/5 to-accent-blue/5"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex justify-between items-center h-20">
             <div className="flex items-center space-x-4">
               <CubeLogo />
-              <h1 className="text-xl font-bold text-primary-black">
-                Regulatory Compliance Explorer
-              </h1>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-blue to-accent-blue bg-clip-text text-transparent">
+                  Regulatory Compliance Explorer
+                </h1>
+                <p className="text-sm text-primary-black opacity-60">
+                  Banking Intelligence Platform
+                </p>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <Button 
                 onClick={handleExportReport}
-                className="bg-primary-blue hover:bg-primary-blue/90 text-primary-white"
+                className="bg-gradient-to-r from-primary-blue to-accent-blue hover:from-primary-blue/90 hover:to-accent-blue/90 text-primary-white shadow-lg hover:shadow-xl transition-all duration-300 pulse-glow"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Export Report
               </Button>
-              <div className="w-8 h-8 bg-primary-grey rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-primary-black" />
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-blue to-accent-blue rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer">
+                <User className="w-5 h-5 text-primary-white" />
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {currentView === 'chat' ? (
-          <div className="lg:col-span-4">
-            <ChatInterface 
-              onSearch={handleSearch}
-              onPreConfiguredQuery={handlePreConfiguredQuery}
-            />
+          <div className="flex justify-center">
+            <div className="w-full max-w-6xl">
+              <ChatInterface 
+                onSearch={handleSearch}
+                onPreConfiguredQuery={handlePreConfiguredQuery}
+              />
+            </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <div className="lg:col-span-1">
               <FilterSidebar 
                 filters={filters}
