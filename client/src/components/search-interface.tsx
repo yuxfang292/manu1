@@ -22,7 +22,7 @@ interface SearchInterfaceProps {
   onGenerateSummary?: () => void;
 }
 
-export default function SearchInterface({ onSearch, onExploreCategory }: SearchInterfaceProps) {
+export default function SearchInterface({ onSearch, onExploreCategory, onGenerateSummary }: SearchInterfaceProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
@@ -255,6 +255,7 @@ export default function SearchInterface({ onSearch, onExploreCategory }: SearchI
         isOpen={isChatModalOpen}
         onClose={() => setIsChatModalOpen(false)}
         onSearch={onSearch}
+        onGenerateSummary={onGenerateSummary}
       />
     </div>
   );
