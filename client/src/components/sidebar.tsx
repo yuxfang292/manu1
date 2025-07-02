@@ -46,7 +46,7 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
           {!collapsed && (
             <div className="flex items-center space-x-2">
               <CubeLogo />
-              <span className="font-semibold text-white">RegPlatform</span>
+              <span className="font-semibold text-white">CUBE RegPlatform</span>
             </div>
           )}
           {collapsed && (
@@ -64,7 +64,6 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
           </Button>
         </div>
       </div>
-
       {/* Module Label */}
       {!collapsed && (
         <div className="px-4 py-2">
@@ -73,7 +72,6 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
           </span>
         </div>
       )}
-
       {/* Navigation Menu */}
       <nav className="flex-1 px-2 py-2">
         {menuItems.map((item) => {
@@ -97,7 +95,6 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
           );
         })}
       </nav>
-
       {/* User Info */}
       {!collapsed && (
         <div className="p-4 border-t border-gray-600/20">
@@ -116,7 +113,6 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
           </div>
         </div>
       )}
-
       {/* Help Center */}
       <div className="p-2">
         <Button
