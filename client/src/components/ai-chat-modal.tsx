@@ -314,11 +314,11 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
       <DialogContent className="max-w-4xl max-h-[90vh] w-[90vw] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <div className="p-2.5 bg-blue-100 rounded-lg">
               <img 
                 src={cubotIcon} 
                 alt="CUBOT AI Assistant" 
-                className="w-5 h-5" 
+                className="w-6 h-6" 
               />
             </div>
             <span>CUBOT</span>
