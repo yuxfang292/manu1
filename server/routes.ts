@@ -9,6 +9,123 @@ import { mcpService, type MCPResponse } from "./mcp-service";
 // This API key is from Gemini Developer API Key, not vertex AI API Key
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
+// Research workflow function
+async function executeResearchWorkflow(userQuery: string): Promise<string> {
+  let retryAttempt = 0;
+  const maxRetries = 1;
+  let qualityGood = false;
+  let foundDocuments: any[] = [];
+  let allKeywords: string[] = [];
+
+  try {
+    while (!qualityGood && retryAttempt <= maxRetries) {
+      // Step 1: Generate keywords using MCP
+      const keywordsResult = await mcpService.keywordsGen(userQuery, 'banking_regulation');
+      const generatedKeywords = keywordsResult.result?.keywords || [];
+      
+      // Add additional keywords based on the topic
+      const additionalKeywords = extractAdditionalKeywords(userQuery);
+      allKeywords = [...generatedKeywords, ...additionalKeywords];
+
+      // Step 2: Document retrieval using keywords
+      const searchResults = await mcpService.contentSearch(allKeywords.join(' '), { keywords: allKeywords });
+      foundDocuments = searchResults.result?.documents || [];
+
+      // Step 3: Quality check
+      qualityGood = assessDocumentQuality(foundDocuments, userQuery);
+      
+      if (!qualityGood && retryAttempt < maxRetries) {
+        // Generate different keywords for retry
+        allKeywords = generateAlternativeKeywords(userQuery, allKeywords);
+        retryAttempt++;
+      } else {
+        break;
+      }
+    }
+
+    // Step 4: Generate comprehensive answer using all collected data
+    const summaryResult = await mcpService.summary(
+      foundDocuments.map(doc => doc.content || doc.excerpt || ''), 
+      { style: 'comprehensive', query: userQuery }
+    );
+
+    // Build research context for final response
+    const researchContext = `
+Research Analysis Complete:
+
+**Keywords Found:** ${allKeywords.slice(0, 10).join(', ')}
+
+**Documents Retrieved:** ${foundDocuments.length} relevant regulatory documents
+${foundDocuments.slice(0, 5).map((doc, idx) => `${idx + 1}. ${doc.title || 'Regulatory Document'}`).join('\n')}
+
+**Research Summary:** ${summaryResult.result?.summary || 'Comprehensive analysis completed'}
+
+**Quality Assessment:** ${qualityGood ? 'High relevance achieved' : 'Maximum search attempts completed'}
+`;
+
+    // Generate final comprehensive response
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: `You are CUBOT, an expert AI compliance assistant. Based on the comprehensive research conducted below, provide a detailed, well-structured answer to the user's question.
+
+${researchContext}
+
+User Question: ${userQuery}
+
+Instructions:
+- Provide a comprehensive answer based on the research findings
+- Include specific regulatory references when available
+- Structure your response with clear sections and bullet points
+- Cite relevant documents or sources from the research
+- Make the response practical and actionable for banking professionals`,
+    });
+
+    return response.text || "I apologize, but I couldn't generate a comprehensive response based on the research. Please try again.";
+
+  } catch (error) {
+    console.error('Research workflow error:', error);
+    return `I encountered an error during the research process: ${error}. Please try your question again.`;
+  }
+}
+
+function extractAdditionalKeywords(query: string): string[] {
+  const queryLower = query.toLowerCase();
+  const additionalKeywords: string[] = [];
+
+  if (queryLower.includes('basel')) additionalKeywords.push('Basel III', 'capital requirements', 'regulatory framework');
+  if (queryLower.includes('capital')) additionalKeywords.push('tier 1', 'common equity', 'capital adequacy');
+  if (queryLower.includes('liquidity')) additionalKeywords.push('LCR', 'liquidity coverage ratio', 'NSFR');
+  if (queryLower.includes('stress')) additionalKeywords.push('stress testing', 'CCAR', 'scenario analysis');
+  if (queryLower.includes('risk')) additionalKeywords.push('risk management', 'credit risk', 'operational risk');
+
+  return additionalKeywords;
+}
+
+function generateAlternativeKeywords(query: string, previousKeywords: string[]): string[] {
+  const alternatives = extractAdditionalKeywords(query);
+  const queryWords = query.toLowerCase().split(' ').filter(word => word.length > 3);
+  
+  return [...alternatives, ...queryWords, 'compliance', 'regulatory', 'banking'].filter(
+    keyword => !previousKeywords.includes(keyword)
+  );
+}
+
+function assessDocumentQuality(documents: any[], query: string): boolean {
+  if (documents.length === 0) return false;
+  
+  const queryWords = query.toLowerCase().split(' ');
+  let relevanceScore = 0;
+  
+  documents.forEach(doc => {
+    const docText = (doc.content + ' ' + doc.title + ' ' + doc.excerpt).toLowerCase();
+    const matchingWords = queryWords.filter(word => docText.includes(word));
+    relevanceScore += matchingWords.length / queryWords.length;
+  });
+  
+  const avgRelevance = relevanceScore / documents.length;
+  return avgRelevance > 0.3; // Threshold for good quality
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get all extracts
   app.get("/api/extracts", async (req, res) => {
@@ -104,7 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Chat endpoint with Gemini integration
   app.post("/api/ai/chat", async (req, res) => {
     try {
-      const { message, history, mcpResults } = req.body;
+      const { message, history, mode = 'chat' } = req.body;
       
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ message: "Message is required" });
@@ -115,47 +232,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`;
       }).join('\n');
 
-      // Build MCP context if available
-      let mcpContext = '';
-      if (mcpResults && Object.keys(mcpResults).length > 0) {
-        mcpContext = '\n\nMCP Research Results (use this information to enhance your response):\n';
-        
-        if (mcpResults.queryGen) {
-          mcpContext += `Query Generation: Generated optimized queries for compliance research\n`;
-        }
-        
-        if (mcpResults.contentSearch) {
-          mcpContext += `Content Search: Found ${mcpResults.contentSearch.result.totalResults} relevant regulatory documents\n`;
-          mcpContext += `Top sources: ${mcpResults.contentSearch.result.results.map((r: any) => r.title).join(', ')}\n`;
-        }
-        
-        if (mcpResults.keywordsGen) {
-          mcpContext += `Keywords Analysis: Identified key compliance terms and categories\n`;
-          mcpContext += `Primary keywords: ${mcpResults.keywordsGen.result.keywords.primary.join(', ')}\n`;
-        }
-        
-        if (mcpResults.summary) {
-          mcpContext += `Summary Analysis: Processed regulatory content for executive overview\n`;
-        }
-      }
-
-      // Call Gemini API using standard 2.5 Pro model
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-pro",
-        contents: `You are an expert AI compliance assistant specializing in banking and financial regulations. Provide detailed, accurate guidance on regulatory requirements, compliance frameworks, and best practices. Focus on practical, actionable advice for banking professionals. Use clear formatting with bullet points and bold text for key information.
+      let responseContent = '';
+      
+      if (mode === 'research') {
+        // Execute research workflow
+        const researchResult = await executeResearchWorkflow(message);
+        responseContent = researchResult;
+      } else {
+        // Simple chat mode
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-pro",
+          contents: `You are CUBOT, a helpful AI compliance assistant specializing in banking and financial regulations. Provide clear, concise answers about regulatory requirements, compliance frameworks, and best practices.
 
 Previous conversation:
-${conversationHistory}${mcpContext}
+${conversationHistory}
 
-User question: ${message}
+User question: ${message}`,
+        });
 
-${mcpContext ? 'Note: I have conducted MCP research to provide you with current and comprehensive regulatory information. Please incorporate these findings naturally into your response.' : ''}`,
-      });
-
-      const responseText = response.text || "I apologize, but I couldn't generate a response. Please try again.";
+        const responseText = response.text || "I apologize, but I couldn't generate a response. Please try again.";
+        responseContent = responseText;
+      }
       
       res.json({ 
-        response: responseText
+        response: responseContent
       });
     } catch (error) {
       console.error('AI Chat error:', error);
