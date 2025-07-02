@@ -117,74 +117,160 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
     setIsLoading(true);
 
     try {
-      // Determine which MCP functions to use based on the query
-      const mcpFunctionsToUse = await determineMCPFunctions(userQuery);
-      let mcpResults: any = {};
+      if (chatMode === 'research') {
+        await handleResearchMode(userQuery);
+      } else {
+        await handleChatMode(userQuery);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-      // Execute MCP functions if needed with natural status messages
-      if (mcpFunctionsToUse.length > 0) {
-        // Add a thinking message to show CUBOT is researching
-        const thinkingMessage: Message = {
-          id: (Date.now() - 1).toString(),
-          role: 'assistant',
-          content: 'Let me research this for you...',
+  const handleChatMode = async (userQuery: string) => {
+    // Simple chat mode - direct AI response without MCP
+    const response = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: userQuery,
+        history: messages.slice(-5),
+        mode: 'chat'
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get AI response');
+    }
+
+    const data = await response.json();
+    
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: data.response,
+      timestamp: new Date(),
+      showActionButtons: false
+    };
+
+    setMessages(prev => [...prev, assistantMessage]);
+  };
+
+  const handleResearchMode = async (userQuery: string) => {
+    let retryAttempt = 0;
+    const maxRetries = 1;
+    let qualityGood = false;
+    let foundDocuments: any[] = [];
+    let allKeywords: string[] = [];
+
+    while (!qualityGood && retryAttempt <= maxRetries) {
+      // Step 1: Generate keywords using MCP
+      const step1Message: Message = {
+        id: `step1-${Date.now()}`,
+        role: 'system',
+        content: '🔍 **Step 1:** Generating keywords based on your question...',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, step1Message]);
+
+      try {
+        const keywordsResult = await mcp.keywordsGen(userQuery, 'banking_regulation');
+        const generatedKeywords = keywordsResult.result?.keywords || [];
+        
+        // Add some additional keywords based on the topic
+        const additionalKeywords = extractAdditionalKeywords(userQuery);
+        allKeywords = [...generatedKeywords, ...additionalKeywords];
+
+        // Update step 1 with keywords found
+        const keywordsDisplay = allKeywords.map(k => `\`${k}\``).join(', ');
+        setMessages(prev => prev.map(msg => 
+          msg.id === step1Message.id 
+            ? { ...msg, content: `✅ **Step 1 Complete:** Found keywords: ${keywordsDisplay}` }
+            : msg
+        ));
+
+        // Step 2: Document retrieval using keywords
+        const step2Message: Message = {
+          id: `step2-${Date.now()}`,
+          role: 'system',
+          content: '📚 **Step 2:** Searching for relevant documents...',
           timestamp: new Date()
         };
-        setMessages(prev => [...prev, thinkingMessage]);
+        setMessages(prev => [...prev, step2Message]);
 
-        for (const func of mcpFunctionsToUse) {
-          try {
-            let result;
-            let statusMessage = '';
-            
-            switch (func) {
-              case 'query_gen':
-                statusMessage = 'Generating optimized search queries...';
-                break;
-              case 'content_search':
-                statusMessage = 'Searching regulatory databases...';
-                break;
-              case 'keywords_gen':
-                statusMessage = 'Analyzing compliance terminology...';
-                break;
-              case 'summary':
-                statusMessage = 'Processing regulatory content...';
-                break;
-            }
+        const searchResults = await mcp.contentSearch(allKeywords.join(' '), { keywords: allKeywords });
+        foundDocuments = searchResults.result?.documents || [];
 
-            // Update the thinking message with current step
-            setMessages(prev => prev.map(msg => 
-              msg.id === thinkingMessage.id 
-                ? { ...msg, content: statusMessage }
-                : msg
-            ));
+        // Display found documents
+        const docDisplay = foundDocuments.length > 0 
+          ? foundDocuments.map((doc, idx) => `${idx + 1}. ${doc.title || doc.name || 'Document'}`).join('\n')
+          : 'No documents found';
 
-            switch (func) {
-              case 'query_gen':
-                result = await mcp.queryGen(userQuery);
-                mcpResults.queryGen = result;
-                break;
-              case 'content_search':
-                result = await mcp.contentSearch(userQuery);
-                mcpResults.contentSearch = result;
-                break;
-              case 'keywords_gen':
-                result = await mcp.keywordsGen(userQuery, 'banking_regulation');
-                mcpResults.keywordsGen = result;
-                break;
-              case 'summary':
-                result = await mcp.summary([userQuery], { style: 'executive' });
-                mcpResults.summary = result;
-                break;
-            }
-          } catch (error) {
-            console.error(`MCP ${func} error:`, error);
-          }
+        setMessages(prev => prev.map(msg => 
+          msg.id === step2Message.id 
+            ? { ...msg, content: `✅ **Step 2 Complete:** Found ${foundDocuments.length} documents:\n${docDisplay}` }
+            : msg
+        ));
+
+        // Step 3: Quality check
+        const step3Message: Message = {
+          id: `step3-${Date.now()}`,
+          role: 'system',
+          content: '⚖️ **Step 3:** Checking document quality and relevance...',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, step3Message]);
+
+        qualityGood = assessDocumentQuality(foundDocuments, userQuery);
+        
+        if (!qualityGood && retryAttempt < maxRetries) {
+          setMessages(prev => prev.map(msg => 
+            msg.id === step3Message.id 
+              ? { ...msg, content: `🔄 **Step 3:** Quality not sufficient. Trying different keywords... (Attempt ${retryAttempt + 2}/${maxRetries + 1})` }
+              : msg
+          ));
+          
+          // Generate different keywords for retry
+          allKeywords = generateAlternativeKeywords(userQuery, allKeywords);
+          retryAttempt++;
+        } else {
+          const qualityStatus = qualityGood ? '✅ Quality check passed!' : '⚠️ Maximum attempts reached, proceeding with available documents.';
+          setMessages(prev => prev.map(msg => 
+            msg.id === step3Message.id 
+              ? { ...msg, content: `✅ **Step 3 Complete:** ${qualityStatus}` }
+              : msg
+          ));
+          break;
         }
-
-        // Remove thinking message before showing final response
-        setMessages(prev => prev.filter(msg => msg.id !== thinkingMessage.id));
+      } catch (error) {
+        console.error('Research step error:', error);
+        retryAttempt++;
       }
+    }
+
+    // Step 4: Generate final answer
+    const step4Message: Message = {
+      id: `step4-${Date.now()}`,
+      role: 'system',
+      content: '🎯 **Step 4:** Analyzing documents and generating comprehensive answer...',
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, step4Message]);
+
+    try {
+      const summaryResult = await mcp.summary(
+        foundDocuments.map(doc => doc.content || doc.excerpt || ''), 
+        { style: 'comprehensive', query: userQuery }
+      );
 
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
@@ -194,7 +280,12 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
         body: JSON.stringify({
           message: userQuery,
           history: messages.slice(-5),
-          mcpResults: mcpResults
+          mode: 'research',
+          researchData: {
+            keywords: allKeywords,
+            documents: foundDocuments,
+            summary: summaryResult
+          }
         }),
       });
 
@@ -203,6 +294,9 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
       }
 
       const data = await response.json();
+
+      // Remove the step 4 message and add final response
+      setMessages(prev => prev.filter(msg => msg.id !== step4Message.id));
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -215,15 +309,51 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to get AI response. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      setMessages(prev => prev.map(msg => 
+        msg.id === step4Message.id 
+          ? { ...msg, content: '❌ **Step 4 Failed:** Error generating final answer. Please try again.' }
+          : msg
+      ));
+      throw error;
     }
+  };
+
+  const extractAdditionalKeywords = (query: string): string[] => {
+    const queryLower = query.toLowerCase();
+    const additionalKeywords: string[] = [];
+
+    if (queryLower.includes('basel')) additionalKeywords.push('Basel III', 'capital requirements', 'regulatory framework');
+    if (queryLower.includes('capital')) additionalKeywords.push('tier 1', 'common equity', 'capital adequacy');
+    if (queryLower.includes('liquidity')) additionalKeywords.push('LCR', 'liquidity coverage ratio', 'NSFR');
+    if (queryLower.includes('stress')) additionalKeywords.push('stress testing', 'CCAR', 'scenario analysis');
+    if (queryLower.includes('risk')) additionalKeywords.push('risk management', 'credit risk', 'operational risk');
+
+    return additionalKeywords;
+  };
+
+  const generateAlternativeKeywords = (query: string, previousKeywords: string[]): string[] => {
+    const alternatives = extractAdditionalKeywords(query);
+    const queryWords = query.toLowerCase().split(' ').filter(word => word.length > 3);
+    
+    return [...alternatives, ...queryWords, 'compliance', 'regulatory', 'banking'].filter(
+      keyword => !previousKeywords.includes(keyword)
+    );
+  };
+
+  const assessDocumentQuality = (documents: any[], query: string): boolean => {
+    if (documents.length === 0) return false;
+    
+    const queryWords = query.toLowerCase().split(' ');
+    let relevanceScore = 0;
+    
+    documents.forEach(doc => {
+      const docText = (doc.content + ' ' + doc.title + ' ' + doc.excerpt).toLowerCase();
+      const matchingWords = queryWords.filter(word => docText.includes(word));
+      relevanceScore += matchingWords.length / queryWords.length;
+    });
+    
+    const avgRelevance = relevanceScore / documents.length;
+    return avgRelevance > 0.3; // Threshold for good quality
   };
 
   // Determine which MCP functions to use based on user query
