@@ -158,7 +158,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] w-[90vw] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -173,14 +173,14 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
 
         <div className="flex-1 flex flex-col space-y-4">
           {/* Messages Area */}
-          <ScrollArea className="flex-1 border rounded-lg p-4">
+          <ScrollArea className="flex-1 border rounded-lg p-4 max-h-[60vh] overflow-y-auto">
             <div className="space-y-4">
               {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[80%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
+                  <div className={`max-w-[85%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
                     <div className={`flex items-start space-x-2 ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
                       <div className={`p-2 rounded-full ${
                         message.role === 'user' ? 'bg-blue-100' : 
@@ -200,7 +200,38 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                           message.role === 'system' ? 'bg-green-50 text-green-900 border border-green-200' : 
                           'bg-gray-100 text-gray-900'
                         }`}>
-                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                          <div className="text-sm whitespace-pre-wrap prose prose-sm max-w-none">
+                            {message.content.split('\n').map((line, index) => {
+                              // Handle bullet points
+                              if (line.trim().startsWith('• **')) {
+                                const match = line.match(/• \*\*(.*?)\*\*: (.+)/);
+                                if (match) {
+                                  return (
+                                    <div key={index} className="mb-1">
+                                      • <strong>{match[1]}</strong>: {match[2]}
+                                    </div>
+                                  );
+                                }
+                              }
+                              // Handle bold text
+                              if (line.includes('**')) {
+                                const parts = line.split(/(\*\*.*?\*\*)/);
+                                return (
+                                  <div key={index} className="mb-1">
+                                    {parts.map((part, partIndex) => 
+                                      part.startsWith('**') && part.endsWith('**') ? (
+                                        <strong key={partIndex}>{part.slice(2, -2)}</strong>
+                                      ) : (
+                                        part
+                                      )
+                                    )}
+                                  </div>
+                                );
+                              }
+                              // Regular line
+                              return line.trim() ? <div key={index} className="mb-1">{line}</div> : <div key={index} className="mb-2"></div>;
+                            })}
+                          </div>
                           <p className={`text-xs mt-1 opacity-70`}>
                             {message.timestamp.toLocaleTimeString()}
                           </p>
