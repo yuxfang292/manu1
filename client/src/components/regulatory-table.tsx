@@ -93,7 +93,7 @@ export default function RegulatoryTable({
               <Button
                 onClick={onContinueChat}
                 size="sm"
-                className="bg-blue-600 text-white hover:bg-blue-700 px-3 py-2"
+                className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-3 py-2"
               >
                 <img 
                   src={cubotIcon} 
