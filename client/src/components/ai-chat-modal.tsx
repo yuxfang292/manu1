@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Send, Bot, User, Sparkles, Search, CheckCircle, FileText, RotateCcw } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Send, Bot, User, Sparkles, Search, CheckCircle, FileText, RotateCcw, Brain, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -41,6 +42,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
   const [isLoading, setIsLoading] = useState(false);
   const [showSessionComplete, setShowSessionComplete] = useState(false);
   const [completedQueries, setCompletedQueries] = useState<string[]>([]);
+  const [chatMode, setChatMode] = useState<'chat' | 'research'>('chat');
   const { toast } = useToast();
   const mcp = useMCP();
 
