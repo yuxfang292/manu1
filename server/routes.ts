@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertSummarySchema } from "@shared/schema";
+import { type InsertSummary } from "./storage";
 import { z } from "zod";
 import { GoogleGenAI } from "@google/genai";
 import { mcpService, type MCPResponse } from "./mcp-service";

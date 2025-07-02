@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { List, LayoutGrid, FileText, MessageCircle } from "lucide-react";
 import { useExtracts } from "@/hooks/use-extracts";
-import type { Extract } from "@shared/schema";
+import type { Extract } from "@shared/types";
 
 interface DataCardsProps {
   searchQuery: string;

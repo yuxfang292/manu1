@@ -7,7 +7,7 @@ import { Eye, Download, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { generatePDF } from "@/lib/pdf-generator";
-import type { Extract } from "@shared/schema";
+import type { Extract } from "@shared/types";
 
 interface SummaryModalProps {
   isOpen: boolean;

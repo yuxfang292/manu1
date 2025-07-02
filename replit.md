@@ -22,11 +22,11 @@ This is a full-stack web application built for compliance and regulatory change 
 - **Development**: Hot module replacement via Vite middleware in development
 
 ### Data Storage Solutions
-- **Database**: PostgreSQL with Drizzle ORM (Production)
-- **Schema**: Structured tables for extracts, keywords, summaries, and users
-- **Storage Implementation**: DatabaseStorage class using Drizzle ORM
-- **Migration**: Drizzle Kit for database schema management
-- **Connection**: Neon serverless PostgreSQL with WebSocket support
+- **Database**: CSV-based file storage (Production)
+- **Data Files**: CSV files in data/ folder for extracts, keywords, summaries, and users
+- **Storage Implementation**: CSVStorage class with CSV file reading/writing
+- **Data Management**: Custom CSV reader with type conversion utilities
+- **File Structure**: Separate CSV files for each data type with proper headers
 
 ## Key Components
 
@@ -118,6 +118,7 @@ This is a full-stack web application built for compliance and regulatory change 
 - July 02, 2025: Replaced all "AI Assistant" references with "CUBOT" branding
 - July 02, 2025: Added chat mode/research mode dropdown selector in AI chat interface
 - July 02, 2025: Implemented backend research workflow with 4-step process: keyword generation, document search, quality assessment, and comprehensive response generation
+- July 02, 2025: **MAJOR CHANGE**: Removed all PostgreSQL connections and switched to CSV-based data storage system
 
 ## User Preferences
 

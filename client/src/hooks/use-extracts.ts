@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import type { Extract } from "@shared/schema";
+import type { Extract } from "@shared/types";
 
 export function useExtracts(searchQuery?: string, filters?: any) {
   return useQuery({

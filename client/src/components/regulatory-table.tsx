@@ -14,7 +14,7 @@ import {
   Clock
 } from "lucide-react";
 import { useExtracts } from "@/hooks/use-extracts";
-import type { Extract } from "@shared/schema";
+import type { Extract } from "@shared/types";
 import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
 
 interface RegulatoryTableProps {

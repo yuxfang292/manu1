@@ -1,6 +1,81 @@
-import { users, extracts, keywords, summaries, type User, type InsertUser, type Extract, type InsertExtract, type Keyword, type InsertKeyword, type Summary, type InsertSummary } from "@shared/schema";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
+// Type definitions for CSV-based storage
+export interface User {
+  id: number;
+  username: string;
+  passwordHash: string;
+}
+
+export interface InsertUser {
+  username: string;
+  passwordHash: string;
+}
+
+export interface Extract {
+  id: number;
+  title: string;
+  source: string;
+  excerpt: string;
+  category: string;
+  jurisdiction: string;
+  priority: string;
+  effectiveDate: string | null;
+  lastUpdated: string;
+  relevanceScore: number;
+  keywords: string[];
+  fullText: string;
+  createdBy: string | null;
+  updatedBy: string | null;
+  createdDate: string | null;
+  updatedDate: string | null;
+}
+
+export interface InsertExtract {
+  title: string;
+  source: string;
+  excerpt: string;
+  category: string;
+  jurisdiction: string;
+  priority: string;
+  effectiveDate?: string | null;
+  lastUpdated: string;
+  relevanceScore: number;
+  keywords: string[];
+  fullText: string;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  createdDate?: string | null;
+  updatedDate?: string | null;
+}
+
+export interface Keyword {
+  id: number;
+  term: string;
+  category: string;
+  usage_count: number;
+}
+
+export interface InsertKeyword {
+  term: string;
+  category: string;
+}
+
+export interface Summary {
+  id: number;
+  title: string;
+  content: string;
+  extractIds: number[];
+  keywords: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface InsertSummary {
+  title: string;
+  content: string;
+  extractIds: number[];
+  keywords: string[];
+}
+import { CSVReader, type CSVRow } from "./csv-reader";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -273,42 +348,115 @@ export class MemStorage implements IStorage {
   }
 }
 
-export class DatabaseStorage implements IStorage {
+export class CSVStorage implements IStorage {
+  private extractsPath = 'data/extracts.csv';
+  private keywordsPath = 'data/keywords.csv'; 
+  private usersPath = 'data/users.csv';
+  private summariesPath = 'data/summaries.csv';
+
+  private csvRowToExtract(row: CSVRow): Extract {
+    return {
+      id: parseInt(row.id) || 0,
+      title: row.title || '',
+      source: row.source || '',
+      excerpt: row.excerpt || '',
+      category: row.category || '',
+      jurisdiction: row.jurisdiction || '',
+      priority: row.priority || '',
+      effectiveDate: row.effectiveDate || null,
+      lastUpdated: row.lastUpdated || '',
+      relevanceScore: parseInt(row.relevanceScore) || 0,
+      keywords: row.keywords ? row.keywords.split(',').map(k => k.trim()) : [],
+      fullText: row.fullText || '',
+      createdBy: row.createdBy || null,
+      updatedBy: row.updatedBy || null,
+      createdDate: row.createdDate || null,
+      updatedDate: row.updatedDate || null
+    };
+  }
+
+  private csvRowToKeyword(row: CSVRow): Keyword {
+    return {
+      id: parseInt(row.id) || 0,
+      term: row.term || '',
+      category: row.category || '',
+      usage_count: parseInt(row.frequency) || 0
+    };
+  }
+
+  private csvRowToUser(row: CSVRow): User {
+    return {
+      id: parseInt(row.id) || 0,
+      username: row.username || '',
+      passwordHash: row.passwordHash || ''
+    };
+  }
+
+  private csvRowToSummary(row: CSVRow): Summary {
+    return {
+      id: parseInt(row.id) || 0,
+      title: row.title || '',
+      content: row.content || '',
+      extractIds: row.extractIds ? row.extractIds.split(',').map(id => parseInt(id.trim())) : [],
+      keywords: row.keywords ? row.keywords.split(',').map(k => k.trim()) : [],
+      createdAt: new Date(row.createdAt || Date.now()),
+      updatedAt: new Date(row.updatedAt || Date.now())
+    };
+  }
+
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+    const users = CSVReader.readCSV(this.usersPath);
+    const userRow = users.find(row => parseInt(row.id) === id);
+    return userRow ? this.csvRowToUser(userRow) : undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
+    const users = CSVReader.readCSV(this.usersPath);
+    const userRow = users.find(row => row.username === username);
+    return userRow ? this.csvRowToUser(userRow) : undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
-    return user;
+    const users = CSVReader.readCSV(this.usersPath);
+    const maxId = Math.max(0, ...users.map(row => parseInt(row.id) || 0));
+    const newUser: User = {
+      id: maxId + 1,
+      username: insertUser.username,
+      passwordHash: insertUser.passwordHash
+    };
+    
+    users.push({
+      id: newUser.id.toString(),
+      username: newUser.username,
+      passwordHash: newUser.passwordHash
+    });
+    
+    CSVReader.writeCSV(this.usersPath, users);
+    return newUser;
   }
 
   async getAllExtracts(): Promise<Extract[]> {
-    return await db.select().from(extracts);
+    const extractRows = CSVReader.readCSV(this.extractsPath);
+    return extractRows.map(row => this.csvRowToExtract(row));
   }
 
   async getExtractById(id: number): Promise<Extract | undefined> {
-    const [extract] = await db.select().from(extracts).where(eq(extracts.id, id));
-    return extract || undefined;
+    const extractRows = CSVReader.readCSV(this.extractsPath);
+    const extractRow = extractRows.find(row => parseInt(row.id) === id);
+    return extractRow ? this.csvRowToExtract(extractRow) : undefined;
   }
 
   async searchExtracts(query: string): Promise<Extract[]> {
-    const searchTerms = query.toLowerCase().split(' ');
-    const allExtracts = await db.select().from(extracts);
+    const extractRows = CSVReader.readCSV(this.extractsPath);
+    const searchLower = query.toLowerCase();
     
-    return allExtracts.filter(extract => {
-      const searchText = `${extract.title} ${extract.excerpt} ${extract.fullText} ${extract.keywords.join(' ')}`.toLowerCase();
-      return searchTerms.some(term => searchText.includes(term));
-    });
+    const filteredRows = extractRows.filter(row => 
+      row.title?.toLowerCase().includes(searchLower) ||
+      row.excerpt?.toLowerCase().includes(searchLower) ||
+      row.fullText?.toLowerCase().includes(searchLower)
+    );
+    
+    return filteredRows.map(row => this.csvRowToExtract(row));
   }
 
   async filterExtracts(filters: {
@@ -319,55 +467,111 @@ export class DatabaseStorage implements IStorage {
     startDate?: string;
     endDate?: string;
   }): Promise<Extract[]> {
-    const allExtracts = await db.select().from(extracts);
+    const extractRows = CSVReader.readCSV(this.extractsPath);
     
-    return allExtracts.filter(extract => {
-      if (filters.categories && !filters.categories.includes(extract.category)) return false;
-      if (filters.jurisdictions && !filters.jurisdictions.includes(extract.jurisdiction)) return false;
-      if (filters.priorities && !filters.priorities.includes(extract.priority)) return false;
-      if (filters.keywords && !filters.keywords.some(keyword => 
-        extract.keywords.some(k => k.toLowerCase().includes(keyword.toLowerCase())))) return false;
+    const filteredRows = extractRows.filter(row => {
+      if (filters.categories?.length && !filters.categories.includes(row.category)) return false;
+      if (filters.jurisdictions?.length && !filters.jurisdictions.includes(row.jurisdiction)) return false;
+      if (filters.priorities?.length && !filters.priorities.includes(row.priority)) return false;
+      
+      if (filters.keywords?.length) {
+        const rowKeywords = row.keywords ? row.keywords.split(',').map(k => k.trim().toLowerCase()) : [];
+        const hasKeyword = filters.keywords.some(keyword => 
+          rowKeywords.includes(keyword.toLowerCase())
+        );
+        if (!hasKeyword) return false;
+      }
+      
       return true;
     });
+    
+    return filteredRows.map(row => this.csvRowToExtract(row));
   }
 
   async createExtract(extract: InsertExtract): Promise<Extract> {
-    const [newExtract] = await db
-      .insert(extracts)
-      .values(extract)
-      .returning();
+    const extractRows = CSVReader.readCSV(this.extractsPath); 
+    const maxId = Math.max(0, ...extractRows.map(row => parseInt(row.id) || 0));
+    
+    const newExtract: Extract = {
+      id: maxId + 1,
+      ...extract,
+      effectiveDate: extract.effectiveDate || null,
+      updatedDate: extract.updatedDate || null
+    };
+    
+    extractRows.push({
+      id: newExtract.id.toString(),
+      title: newExtract.title,
+      source: newExtract.source,
+      excerpt: newExtract.excerpt,
+      category: newExtract.category,
+      jurisdiction: newExtract.jurisdiction,
+      priority: newExtract.priority,
+      effectiveDate: newExtract.effectiveDate || '',
+      lastUpdated: newExtract.lastUpdated,
+      relevanceScore: newExtract.relevanceScore.toString(),
+      keywords: newExtract.keywords.join(','),
+      fullText: newExtract.fullText,
+      createdBy: newExtract.createdBy,
+      updatedBy: newExtract.updatedBy,
+      createdDate: newExtract.createdDate,
+      updatedDate: newExtract.updatedDate || ''
+    });
+    
+    CSVReader.writeCSV(this.extractsPath, extractRows);
     return newExtract;
   }
 
   async getAllKeywords(): Promise<Keyword[]> {
-    return await db.select().from(keywords);
+    const keywordRows = CSVReader.readCSV(this.keywordsPath);
+    return keywordRows.map(row => this.csvRowToKeyword(row));
   }
 
   async getKeywordsByCategory(category: string): Promise<Keyword[]> {
-    const allKeywords = await db.select().from(keywords);
-    return allKeywords.filter(k => k.category === category);
+    const keywordRows = CSVReader.readCSV(this.keywordsPath);
+    const filteredRows = keywordRows.filter(row => row.category === category);
+    return filteredRows.map(row => this.csvRowToKeyword(row));
   }
 
   async searchKeywords(query: string): Promise<Keyword[]> {
-    const searchTerm = query.toLowerCase();
-    const allKeywords = await db.select().from(keywords);
-    return allKeywords.filter(k => 
-      k.term.toLowerCase().includes(searchTerm) || k.category.toLowerCase().includes(searchTerm)
+    const keywordRows = CSVReader.readCSV(this.keywordsPath);
+    const searchLower = query.toLowerCase();
+    const filteredRows = keywordRows.filter(row => 
+      row.term?.toLowerCase().includes(searchLower)
     );
+    return filteredRows.map(row => this.csvRowToKeyword(row));
   }
 
   async createSummary(summary: InsertSummary): Promise<Summary> {
-    const [newSummary] = await db
-      .insert(summaries)
-      .values(summary)
-      .returning();
+    const summaryRows = CSVReader.readCSV(this.summariesPath);
+    const maxId = Math.max(0, ...summaryRows.map(row => parseInt(row.id) || 0));
+    
+    const newSummary: Summary = {
+      id: maxId + 1,
+      ...summary,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    summaryRows.push({
+      id: newSummary.id.toString(),
+      title: newSummary.title,
+      content: newSummary.content,
+      extractIds: newSummary.extractIds.join(','),
+      keywords: newSummary.keywords.join(','),
+      createdAt: newSummary.createdAt.toISOString(),
+      updatedAt: newSummary.updatedAt.toISOString()
+    });
+    
+    CSVReader.writeCSV(this.summariesPath, summaryRows);
     return newSummary;
   }
 
   async getSummaryById(id: number): Promise<Summary | undefined> {
-    const [summary] = await db.select().from(summaries).where(eq(summaries.id, id));
-    return summary || undefined;
+    const summaryRows = CSVReader.readCSV(this.summariesPath);
+    const summaryRow = summaryRows.find(row => parseInt(row.id) === id);
+    return summaryRow ? this.csvRowToSummary(summaryRow) : undefined;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new CSVStorage();
