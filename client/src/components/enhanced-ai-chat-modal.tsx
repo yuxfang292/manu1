@@ -118,6 +118,11 @@ export default function EnhancedAIChatModal({ isOpen, onClose }: EnhancedAIChatM
         <CardTitle className="flex items-center gap-2 text-sm">
           <Key className="h-4 w-4" />
           {viz.title}
+          {viz.data.aiGenerated && (
+            <Badge variant="outline" className="text-xs ml-auto">
+              AI Generated
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -141,16 +146,21 @@ export default function EnhancedAIChatModal({ isOpen, onClose }: EnhancedAIChatM
             ))}
           </div>
         </div>
-        {viz.data.generated?.length > 0 && (
+        {viz.data.emerging?.length > 0 && (
           <div>
-            <p className="text-sm font-medium mb-2">AI Generated:</p>
+            <p className="text-sm font-medium mb-2">Emerging Trends:</p>
             <div className="flex flex-wrap gap-1">
-              {viz.data.generated?.map((keyword: string, idx: number) => (
-                <Badge key={idx} variant="outline" className="text-xs">
+              {viz.data.emerging?.map((keyword: string, idx: number) => (
+                <Badge key={idx} variant="outline" className="text-xs bg-blue-50 text-blue-700">
                   {keyword}
                 </Badge>
               ))}
             </div>
+          </div>
+        )}
+        {viz.data.totalKeywords && (
+          <div className="pt-2 border-t text-xs text-muted-foreground">
+            Total: {viz.data.totalKeywords} keywords • Confidence: {Math.round((viz.data.confidence || 0) * 100)}%
           </div>
         )}
       </CardContent>
@@ -163,28 +173,55 @@ export default function EnhancedAIChatModal({ isOpen, onClose }: EnhancedAIChatM
         <CardTitle className="flex items-center gap-2 text-sm">
           <FileText className="h-4 w-4" />
           {viz.title} ({viz.data.totalFound} found)
+          {viz.data.aiGenerated && (
+            <Badge variant="outline" className="text-xs ml-auto">
+              AI Generated
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-48">
           <div className="space-y-2">
             {viz.data.documents?.map((doc: any, idx: number) => (
-              <div key={idx} className="p-3 border rounded-lg">
+              <div key={idx} className="p-3 border rounded-lg hover:bg-gray-50">
                 <div className="flex items-start justify-between mb-2">
-                  <h4 className="text-sm font-medium line-clamp-1">{doc.title}</h4>
-                  <Badge variant="outline" className="text-xs ml-2">
-                    {doc.relevanceScore}%
+                  <h4 className="text-sm font-medium line-clamp-2">{doc.title}</h4>
+                  <Badge variant="outline" className="text-xs ml-2 shrink-0">
+                    {Math.round((doc.relevanceScore || 0) * 100)}%
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground mb-1">{doc.source}</p>
-                <p className="text-xs text-muted-foreground">{doc.excerpt}</p>
-                <Badge variant="secondary" className="text-xs mt-1">
-                  {doc.category}
-                </Badge>
+                <p className="text-xs text-blue-600 mb-1">{doc.source}</p>
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-3">{doc.excerpt}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-1">
+                    <Badge variant="secondary" className="text-xs">
+                      {doc.category}
+                    </Badge>
+                    {doc.jurisdiction && (
+                      <Badge variant="outline" className="text-xs">
+                        {doc.jurisdiction}
+                      </Badge>
+                    )}
+                  </div>
+                  {doc.lastUpdated && (
+                    <span className="text-xs text-muted-foreground">
+                      {doc.lastUpdated}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         </ScrollArea>
+        {viz.data.searchMetrics && (
+          <div className="pt-3 border-t mt-3 text-xs text-muted-foreground">
+            <div className="grid grid-cols-2 gap-2">
+              <span>Processing: {viz.data.searchMetrics.processingTime}</span>
+              <span>Indexes: {viz.data.searchMetrics.indexesSearched?.length || 0}</span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
