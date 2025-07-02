@@ -121,16 +121,17 @@ export default function FinalReportModal({
         searchQuery
       });
 
-      const response = await apiRequest('/api/reports/generate', 'POST', {
+      const response = await apiRequest('POST', '/api/reports/generate', {
         mcpDocuments: documentsToUse, // Send documents (MCP or default)
         keywords: selectedKeywords,
         style: reportStyle,
         searchQuery
       });
 
-      console.log('Report generation response:', response);
+      const responseData = await response.json();
+      console.log('Report generation response:', responseData);
       
-      const reportId = response.reportId;
+      const reportId = responseData.reportId;
       
       toast({
         title: "Report Generated",
@@ -239,73 +240,61 @@ export default function FinalReportModal({
 
             <Separator />
 
-            {/* Keywords Selection */}
+            {/* Modern Bubble Keywords Selection */}
             {keywords.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="font-semibold">Keywords to Include</h3>
-                <p className="text-sm text-gray-600">
-                  Select keywords to focus the report analysis (optional)
-                </p>
-                <div className="flex flex-wrap gap-2">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">Research Keywords</h3>
+                  <p className="text-sm text-gray-500">
+                    Select keywords to focus your report analysis
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
                   {keywords.slice(0, 15).map((keyword) => (
-                    <Badge
+                    <button
                       key={keyword}
-                      variant={selectedKeywords.includes(keyword) ? "default" : "outline"}
-                      className={`cursor-pointer transition-colors ${
-                        selectedKeywords.includes(keyword)
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
-                          : 'hover:bg-gray-100'
-                      }`}
                       onClick={() => handleKeywordToggle(keyword)}
+                      className={`
+                        px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 
+                        shadow-sm hover:shadow-md transform hover:scale-105 border
+                        ${selectedKeywords.includes(keyword)
+                          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-blue-500 shadow-blue-200'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50'
+                        }
+                      `}
                     >
-                      {keyword}
-                    </Badge>
+                      <span className="flex items-center gap-2">
+                        {keyword}
+                        {selectedKeywords.includes(keyword) && (
+                          <span className="text-blue-100 text-xs">✓</span>
+                        )}
+                      </span>
+                    </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500">
+                <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   {selectedKeywords.length} of {keywords.length} keywords selected
-                </p>
+                </div>
               </div>
             )}
 
             <Separator />
 
-            {/* Documents Selection */}
-            <div className="space-y-3">
-              <h3 className="font-semibold">Documents to Include</h3>
-              <p className="text-sm text-gray-600">
-                Select specific documents for the report ({mcpDocuments.length} found by research)
+            {/* Research Summary */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <h3 className="font-semibold text-gray-800">Research Foundation</h3>
+              </div>
+              <p className="text-sm text-gray-600 mb-3">
+                Your report will be generated using CUBOT's research findings for: <span className="font-medium text-blue-700">"{searchQuery}"</span>
               </p>
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {mcpDocuments.map((doc: any, index: number) => (
-                  <Card key={`mcp-doc-${index}`} className="p-0">
-                    <CardContent className="p-3">
-                      <div className="flex items-start space-x-3">
-                        <Checkbox
-                          checked={true} // All documents selected by default
-                          onCheckedChange={() => {}} // Documents are always selected
-                          className="mt-1"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm truncate">
-                            {doc.title || `Document ${index + 1}`}
-                          </h4>
-                          <p className="text-xs text-gray-600 line-clamp-2 mt-1">
-                            {doc.excerpt || doc.summary || doc.content || 'Regulatory compliance document'}
-                          </p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline" className="text-xs">
-                              {doc.category || 'Regulatory'}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {doc.source || 'Research'}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500">Analysis includes regulatory documents, compliance guidelines, and best practices</span>
+                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                  {mcpDocuments.length || 'AI'} Sources
+                </span>
               </div>
             </div>
           </div>
@@ -314,7 +303,7 @@ export default function FinalReportModal({
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-4 border-t">
           <div className="text-sm text-gray-600">
-            {mcpDocuments.length} documents, {selectedKeywords.length} keywords selected
+            Ready to generate report with {selectedKeywords.length} selected keywords
           </div>
           <div className="flex gap-3">
             <Button
