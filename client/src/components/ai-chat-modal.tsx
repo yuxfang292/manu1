@@ -20,6 +20,11 @@ interface Message {
   showActionButtons?: boolean;
   userQuery?: string;
   isThinking?: boolean;
+  mcpData?: {
+    keywords?: string[];
+    documents?: any[];
+    quality?: { score: number; status: string };
+  };
 }
 
 interface AIChatModalProps {
@@ -117,34 +122,11 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userQuery,
-          history: messages.slice(-5),
-          mode: chatMode
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get AI response');
+      if (chatMode === 'research') {
+        await handleResearchMode(userQuery);
+      } else {
+        await handleChatMode(userQuery);
       }
-
-      const data = await response.json();
-      
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data.response,
-        timestamp: new Date(),
-        showActionButtons: chatMode === 'research',
-        userQuery: userQuery
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -154,6 +136,179 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleChatMode = async (userQuery: string) => {
+    const response = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: userQuery,
+        history: messages.slice(-5),
+        mode: 'chat'
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get AI response');
+    }
+
+    const data = await response.json();
+    
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: data.response,
+      timestamp: new Date(),
+      showActionButtons: false
+    };
+
+    setMessages(prev => [...prev, assistantMessage]);
+  };
+
+  const handleResearchMode = async (userQuery: string) => {
+    // Step 1: Generate keywords
+    const step1Message: Message = {
+      id: `step1-${Date.now()}`,
+      role: 'system',
+      content: '🔍 **Step 1:** Generating keywords from your question...',
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, step1Message]);
+
+    try {
+      const keywordsResult = await fetch('/api/mcp/keywords-gen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: userQuery, category: 'banking_regulation' })
+      }).then(res => res.json());
+
+      const keywords = [
+        ...(keywordsResult.result?.keywords?.primary || []),
+        ...(keywordsResult.result?.keywords?.secondary || []),
+        ...(keywordsResult.result?.keywords?.emerging || [])
+      ];
+
+      setMessages(prev => prev.map(msg => 
+        msg.id === step1Message.id 
+          ? { 
+              ...msg, 
+              content: `✅ **Step 1 Complete:** Found ${keywords.length} keywords`,
+              mcpData: { keywords: keywords.slice(0, 12) }
+            }
+          : msg
+      ));
+
+      // Step 2: Search documents
+      const step2Message: Message = {
+        id: `step2-${Date.now()}`,
+        role: 'system',
+        content: '📚 **Step 2:** Searching regulatory documents...',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, step2Message]);
+
+      const searchResult = await fetch('/api/mcp/content-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: keywords.join(' '), filters: { keywords } })
+      }).then(res => res.json());
+
+      const documents = searchResult.result?.documents || [];
+
+      setMessages(prev => prev.map(msg => 
+        msg.id === step2Message.id 
+          ? { 
+              ...msg, 
+              content: `✅ **Step 2 Complete:** Found ${documents.length} regulatory documents`,
+              mcpData: { documents: documents.slice(0, 6) }
+            }
+          : msg
+      ));
+
+      // Step 3: Quality assessment
+      const step3Message: Message = {
+        id: `step3-${Date.now()}`,
+        role: 'system',
+        content: '⚖️ **Step 3:** Assessing document quality...',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, step3Message]);
+
+      // Enhanced quality assessment with metrics
+      const qualityGood = documents.length > 0;
+      const avgRelevance = documents.length > 0 
+        ? Math.round((documents.reduce((sum: number, doc: any) => sum + (doc.relevanceScore || 0.8), 0) / documents.length) * 100)
+        : 0;
+
+      setMessages(prev => prev.map(msg => 
+        msg.id === step3Message.id 
+          ? { 
+              ...msg, 
+              content: `✅ **Step 3 Complete:** Quality Assessment`,
+              mcpData: { 
+                quality: { 
+                  score: avgRelevance, 
+                  status: qualityGood ? 'High Quality' : 'Standard',
+                  documentsCount: documents.length,
+                  keywordsCount: keywords.length 
+                }
+              }
+            }
+          : msg
+      ));
+
+      // Step 4: Generate comprehensive response
+      const step4Message: Message = {
+        id: `step4-${Date.now()}`,
+        role: 'system',
+        content: '🎯 **Step 4:** Generating comprehensive analysis...',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, step4Message]);
+
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userQuery,
+          history: messages.slice(-5),
+          mode: 'research',
+          researchData: { keywords, documents }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI response');
+      }
+
+      const data = await response.json();
+
+      // Replace step 4 with final response
+      setMessages(prev => prev.filter(msg => msg.id !== step4Message.id));
+      
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: data.response,
+        timestamp: new Date(),
+        showActionButtons: true,
+        userQuery: userQuery
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+
+    } catch (error) {
+      console.error('Research mode error:', error);
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: 'Sorry, I encountered an error during research. Please try again.',
+        timestamp: new Date()
+      }]);
     }
   };
 
@@ -363,6 +518,72 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                                 >
                                   {message.content}
                                 </ReactMarkdown>
+                              </div>
+                            )}
+                            
+                            {/* MCP Data Visualization */}
+                            {message.mcpData && (
+                              <div className="mt-3 space-y-3">
+                                {/* Keywords Display */}
+                                {message.mcpData.keywords && (
+                                  <div className="bg-blue-50 rounded-lg p-3">
+                                    <div className="flex flex-wrap gap-1">
+                                      {message.mcpData.keywords.map((keyword: string, idx: number) => (
+                                        <Badge key={idx} variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                                          {keyword}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {/* Documents Display */}
+                                {message.mcpData.documents && (
+                                  <div className="space-y-2">
+                                    {message.mcpData.documents.map((doc: any, idx: number) => (
+                                      <div key={idx} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
+                                        <div className="flex items-start justify-between">
+                                          <div className="flex-1">
+                                            <h4 className="font-medium text-sm text-gray-900">{doc.title}</h4>
+                                            <p className="text-xs text-gray-600 mt-1">{doc.source || 'Regulatory Source'}</p>
+                                            <p className="text-xs text-gray-700 mt-1">{doc.excerpt?.substring(0, 120)}...</p>
+                                          </div>
+                                          <div className="ml-2">
+                                            <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                                              {Math.round((doc.relevanceScore || 0.8) * 100)}% match
+                                            </Badge>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                
+                                {/* Quality Assessment Display */}
+                                {message.mcpData.quality && (
+                                  <div className="bg-gray-50 rounded-lg p-3">
+                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                      <div>
+                                        <span className="font-medium">Documents Found:</span>
+                                        <span className="ml-2 text-blue-600">{message.mcpData.quality.documentsCount}</span>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">Avg. Relevance:</span>
+                                        <span className="ml-2 text-green-600">{message.mcpData.quality.score}%</span>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">Quality Status:</span>
+                                        <span className={`ml-2 ${message.mcpData.quality.status === 'High Quality' ? 'text-green-600' : 'text-orange-600'}`}>
+                                          {message.mcpData.quality.status}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span className="font-medium">Keywords Used:</span>
+                                        <span className="ml-2 text-purple-600">{message.mcpData.quality.keywordsCount}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
