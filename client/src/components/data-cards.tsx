@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { List, LayoutGrid, FileText } from "lucide-react";
+import { List, LayoutGrid, FileText, MessageCircle } from "lucide-react";
 import { useExtracts } from "@/hooks/use-extracts";
 import type { Extract } from "@shared/schema";
 
@@ -19,6 +19,7 @@ interface DataCardsProps {
   selectedCards: number[];
   onCardSelection: (cardId: number, selected: boolean) => void;
   onGenerateSummary: () => void;
+  onContinueChat?: () => void;
 }
 
 export default function DataCards({ 
@@ -26,7 +27,8 @@ export default function DataCards({
   filters, 
   selectedCards, 
   onCardSelection, 
-  onGenerateSummary 
+  onGenerateSummary,
+  onContinueChat 
 }: DataCardsProps) {
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [currentPage, setCurrentPage] = useState(1);
@@ -89,6 +91,19 @@ export default function DataCards({
           </p>
         </div>
         <div className="flex items-center space-x-2">
+          {onContinueChat && (
+            <>
+              <Button
+                size="sm"
+                onClick={onContinueChat}
+                className="bg-primary-blue text-primary-white hover:bg-primary-blue/90"
+              >
+                <MessageCircle className="w-4 h-4 mr-1" />
+                Continue Conversation
+              </Button>
+              <span className="text-primary-black opacity-50">|</span>
+            </>
+          )}
           <Button
             variant={viewMode === 'list' ? 'default' : 'outline'}
             size="sm"

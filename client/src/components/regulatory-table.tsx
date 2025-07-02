@@ -7,7 +7,8 @@ import {
   ChevronUp, 
   MoreHorizontal,
   Star,
-  Eye
+  Eye,
+  MessageCircle
 } from "lucide-react";
 import { useExtracts } from "@/hooks/use-extracts";
 import type { Extract } from "@shared/schema";
@@ -17,13 +18,15 @@ interface RegulatoryTableProps {
   filters?: any;
   selectedCards: number[];
   onCardSelection: (cardId: number, selected: boolean) => void;
+  onContinueChat?: () => void;
 }
 
 export default function RegulatoryTable({ 
   searchQuery, 
   filters, 
   selectedCards, 
-  onCardSelection 
+  onCardSelection,
+  onContinueChat 
 }: RegulatoryTableProps) {
   const [sortField, setSortField] = useState<string>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -80,6 +83,29 @@ export default function RegulatoryTable({
 
   return (
     <div className="bg-white">
+      {/* Header with controls */}
+      {searchQuery && (
+        <div className="px-4 py-4 border-b border-gray-200 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Search Results for "{searchQuery}"
+            </h2>
+            <p className="text-sm text-gray-500">
+              {extracts?.length || 0} regulatory extracts found
+            </p>
+          </div>
+          {onContinueChat && (
+            <Button
+              onClick={onContinueChat}
+              className="bg-primary-blue text-primary-white hover:bg-primary-blue/90"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Continue Conversation
+            </Button>
+          )}
+        </div>
+      )}
+      
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-[var(--table-border)]">
