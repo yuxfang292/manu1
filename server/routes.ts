@@ -3,12 +3,10 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertSummarySchema } from "@shared/schema";
 import { z } from "zod";
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenAI } from "@google/genai";
 
-// Initialize Claude client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// This API key is from Gemini Developer API Key, not vertex AI API Key
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get all extracts
@@ -102,7 +100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Chat endpoint with Claude integration
+  // AI Chat endpoint with Gemini integration
   app.post("/api/ai/chat", async (req, res) => {
     try {
       const { message } = req.body;
@@ -111,20 +109,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Message is required" });
       }
 
-      // Call Claude API
-      const response = await anthropic.messages.create({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1024,
-        system: "You are an expert AI compliance assistant specializing in banking and financial regulations. Provide detailed, accurate guidance on regulatory requirements, compliance frameworks, and best practices. Focus on practical, actionable advice for banking professionals. Use clear formatting with bullet points and bold text for key information.",
-        messages: [
-          {
-            role: "user",
-            content: message
-          }
-        ]
+      // Call Gemini API
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: `You are an expert AI compliance assistant specializing in banking and financial regulations. Provide detailed, accurate guidance on regulatory requirements, compliance frameworks, and best practices. Focus on practical, actionable advice for banking professionals. Use clear formatting with bullet points and bold text for key information.
+
+User question: ${message}`,
       });
 
-      const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
+      const responseText = response.text || "I apologize, but I couldn't generate a response. Please try again.";
       
       res.json({ response: responseText });
     } catch (error) {
