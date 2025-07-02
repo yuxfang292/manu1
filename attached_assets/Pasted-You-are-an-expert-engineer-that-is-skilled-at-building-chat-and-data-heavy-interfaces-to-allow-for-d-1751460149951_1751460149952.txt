@@ -1,0 +1,57 @@
+You are an expert engineer that is skilled at building chat and data heavy interfaces to allow for data exploration.
+
+Carefully read the user type, user flow, data points and design constraints below and develop screens to facilitate the outcomes.
+
+User type:
+The user is a compliance and regulatory change professional for banks. They need to be able to understand and explore lots of their regulations quickly and produce a summary PDF report to share their research with their stakeholders.
+
+User flow:
+A user is landed onto a chat entry point, featuring a welcome, a free text field and a set of pre configured buttons or questions
+The user can enter text into the field or select a button
+The screen should then present relevant financial obligation text data "cards" and their attributes
+The data should be grouped initially by their broad query
+The user should then be given more options to filter and explore each of the data cards and filter down the available text cards
+The user may iterate through a number of filters forwards and backwards to explore to items of relevance
+The filtering action should dynamically update the screen of the cards
+These filters can be interacted using key word buttons or a free text
+If the user uses free text it should filter using keyword data points from the user text input
+The logic for filtering operates on the data points for Extracts
+At any point the user can make a can make a selection of the cards to be summarised using the summarisation logic
+This shows the preview of the summarisation, for user review, the user may amend the summary and once happy export it as a report to the PDF
+
+Data points:
+The data should be currently mocked and is organised into a concept of Extracts with a number of metadata attributes
+The cards should take the Extract and their metadata from a to be specified DB
+Keywords should be specified as a separate discrete set
+
+Summaristation logic:
+The summary should be presented in two sections with clarity to read
+Overview:
+A two sentence synthesised context of the grouping of extract obligation cards
+Key points:
+A set of bullet points, each of which is a discrete topic
+Conclusion:
+A final sentence that concludes the reseach
+
+
+Design constraints:
+Only select from the following colors:
+Primary Blue
+#0081c2
+Accent Blue
+#8cc1d1
+Supporting Blue
+#dfeff4
+Primary Grey
+#c6c6c6
+Secondary Grey
+#dadada
+Background grey
+#ededed
+Primary Black
+#222628
+Primary White
+#ffffff
+Only use Verdana with:
+a maximum Weight: 400
+Styles: normal, bold, italic
