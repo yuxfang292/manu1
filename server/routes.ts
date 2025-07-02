@@ -434,16 +434,13 @@ User question: ${message}`,
   // Final Report generation endpoint
   app.post('/api/reports/generate', async (req, res) => {
     try {
-      const { documentIds, keywords, style, searchQuery } = req.body;
+      const { mcpDocuments, keywords, style, searchQuery } = req.body;
       
-      // Get selected documents
-      const selectedExtracts = await storage.getAllExtracts();
-      const documents = selectedExtracts.filter(extract => 
-        documentIds.includes(extract.id)
-      );
+      // Use MCP documents directly from research
+      const documents = mcpDocuments || [];
 
       if (documents.length === 0) {
-        return res.status(400).json({ error: 'No valid documents selected' });
+        return res.status(400).json({ error: 'No research documents found' });
       }
 
       // Generate structured report content

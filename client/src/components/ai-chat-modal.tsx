@@ -326,12 +326,32 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
   }
 
   const handleFinalReport = (query: string) => {
-    // Extract keywords from the message that contains MCP data
-    const message = messages.find(msg => msg.userQuery === query && msg.mcpData?.keywords);
-    const keywords = message?.mcpData?.keywords || [];
+    // Find all messages with MCP data for this query to get keywords and documents
+    const mcpMessages = messages.filter(msg => 
+      msg.userQuery === query && msg.mcpData && 
+      (msg.mcpData.keywords || msg.mcpData.documents)
+    );
+    
+    // Collect all keywords and documents from MCP results
+    const allKeywords: string[] = [];
+    const allDocuments: any[] = [];
+    
+    mcpMessages.forEach(msg => {
+      if (msg.mcpData?.keywords) {
+        allKeywords.push(...msg.mcpData.keywords);
+      }
+      if (msg.mcpData?.documents) {
+        allDocuments.push(...msg.mcpData.documents);
+      }
+    });
+    
+    // Remove duplicates
+    const uniqueKeywords = allKeywords.filter((keyword, index) => 
+      allKeywords.indexOf(keyword) === index
+    );
     
     setFinalReportQuery(query);
-    setFinalReportKeywords(keywords);
+    setFinalReportKeywords(uniqueKeywords);
     setShowFinalReportModal(true);
   };
 
@@ -723,9 +743,12 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
       <FinalReportModal
         isOpen={showFinalReportModal}
         onClose={() => setShowFinalReportModal(false)}
-        selectedCards={[]} // Will be populated from search results
+        selectedCards={[]} // Will be populated from MCP documents
         keywords={finalReportKeywords}
         searchQuery={finalReportQuery}
+        mcpDocuments={messages.filter(msg => 
+          msg.userQuery === finalReportQuery && msg.mcpData?.documents
+        ).flatMap(msg => msg.mcpData?.documents || [])}
       />
     </Dialog>
   );

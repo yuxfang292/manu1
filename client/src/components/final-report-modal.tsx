@@ -18,6 +18,7 @@ interface FinalReportModalProps {
   selectedCards: number[];
   keywords?: string[];
   searchQuery?: string;
+  mcpDocuments?: any[];
 }
 
 interface ReportStyle {
@@ -59,7 +60,8 @@ export default function FinalReportModal({
   onClose, 
   selectedCards, 
   keywords = [],
-  searchQuery = ''
+  searchQuery = '',
+  mcpDocuments = []
 }: FinalReportModalProps) {
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [selectedDocuments, setSelectedDocuments] = useState<number[]>(selectedCards);
@@ -70,11 +72,11 @@ export default function FinalReportModal({
   const { data: extracts } = useExtracts();
   const { toast } = useToast();
   
-  // Initialize selections when modal opens
+  // Initialize selections when modal opens - SELECT ALL BY DEFAULT
   useEffect(() => {
     if (isOpen) {
       setSelectedDocuments(selectedCards);
-      setSelectedKeywords(keywords.slice(0, 10)); // Limit to 10 keywords
+      setSelectedKeywords(keywords); // Select ALL keywords by default
     }
   }, [isOpen, selectedCards, keywords]);
 
@@ -99,10 +101,10 @@ export default function FinalReportModal({
   };
 
   const handleGenerateReport = async () => {
-    if (selectedDocuments.length === 0) {
+    if (mcpDocuments.length === 0) {
       toast({
-        title: "No Documents Selected",
-        description: "Please select at least one document to generate a report.",
+        title: "No Documents Found",
+        description: "No research documents available to generate a report.",
         variant: "destructive"
       });
       return;
@@ -111,7 +113,7 @@ export default function FinalReportModal({
     setIsGenerating(true);
     try {
       const response = await apiRequest('/api/reports/generate', 'POST', {
-        documentIds: selectedDocuments,
+        mcpDocuments: mcpDocuments, // Send MCP documents directly
         keywords: selectedKeywords,
         style: reportStyle,
         searchQuery
@@ -262,31 +264,31 @@ export default function FinalReportModal({
             <div className="space-y-3">
               <h3 className="font-semibold">Documents to Include</h3>
               <p className="text-sm text-gray-600">
-                Select specific documents for the report ({selectedDocuments.length} selected)
+                Select specific documents for the report ({mcpDocuments.length} found by research)
               </p>
               <div className="space-y-2 max-h-64 overflow-y-auto">
-                {extracts?.filter((extract: any) => selectedCards.includes(extract.id)).map((extract: any) => (
-                  <Card key={extract.id} className="p-0">
+                {mcpDocuments.map((doc: any, index: number) => (
+                  <Card key={`mcp-doc-${index}`} className="p-0">
                     <CardContent className="p-3">
                       <div className="flex items-start space-x-3">
                         <Checkbox
-                          checked={selectedDocuments.includes(extract.id)}
-                          onCheckedChange={() => handleDocumentToggle(extract.id)}
+                          checked={true} // All documents selected by default
+                          onCheckedChange={() => {}} // Documents are always selected
                           className="mt-1"
                         />
                         <div className="flex-1 min-w-0">
                           <h4 className="font-medium text-sm truncate">
-                            {extract.title}
+                            {doc.title || `Document ${index + 1}`}
                           </h4>
                           <p className="text-xs text-gray-600 line-clamp-2 mt-1">
-                            {extract.summary}
+                            {doc.excerpt || doc.summary || doc.content || 'Regulatory compliance document'}
                           </p>
                           <div className="flex items-center gap-2 mt-2">
                             <Badge variant="outline" className="text-xs">
-                              {extract.category}
+                              {doc.category || 'Regulatory'}
                             </Badge>
                             <Badge variant="outline" className="text-xs">
-                              {extract.jurisdiction}
+                              {doc.source || 'Research'}
                             </Badge>
                           </div>
                         </div>
@@ -302,7 +304,7 @@ export default function FinalReportModal({
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-4 border-t">
           <div className="text-sm text-gray-600">
-            {selectedDocuments.length} documents, {selectedKeywords.length} keywords selected
+            {mcpDocuments.length} documents, {selectedKeywords.length} keywords selected
           </div>
           <div className="flex gap-3">
             <Button
