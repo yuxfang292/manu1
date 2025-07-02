@@ -6,6 +6,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Send, Bot, User, Sparkles, Search, CheckCircle, FileText, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
 
 interface Message {
@@ -256,7 +258,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                           message.role === 'thinking' ? 'bg-purple-50 text-purple-900 border border-purple-200' :
                           'bg-gray-100 text-gray-900'
                         }`}>
-                          <div className="text-sm whitespace-pre-wrap prose prose-sm max-w-none">
+                          <div className="text-sm prose prose-sm max-w-none">
                             {message.role === 'thinking' ? (
                               <div className="flex items-center space-x-2">
                                 <div className="flex space-x-1">
@@ -264,41 +266,56 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                                   <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
                                   <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                                 </div>
-                                <span className="text-purple-700 italic">{message.content}</span>
+                                <div className="text-purple-700 italic">
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {message.content}
+                                  </ReactMarkdown>
+                                </div>
                               </div>
                             ) : (
-                              <>
-                                {message.content.split('\n').map((line, index) => {
-                                  // Handle bullet points
-                                  if (line.trim().startsWith('• **')) {
-                                    const match = line.match(/• \*\*(.*?)\*\*: (.+)/);
-                                    if (match) {
-                                      return (
-                                        <div key={index} className="mb-1">
-                                          • <strong>{match[1]}</strong>: {match[2]}
-                                        </div>
-                                      );
-                                    }
-                                  }
-                                  // Handle bold text
-                                  if (line.includes('**')) {
-                                    const parts = line.split(/(\*\*.*?\*\*)/);
-                                    return (
-                                      <div key={index} className="mb-1">
-                                        {parts.map((part, partIndex) => 
-                                          part.startsWith('**') && part.endsWith('**') ? (
-                                            <strong key={partIndex}>{part.slice(2, -2)}</strong>
-                                          ) : (
-                                            part
-                                          )
-                                        )}
-                                      </div>
-                                    );
-                                  }
-                                  // Regular line
-                                  return line.trim() ? <div key={index} className="mb-1">{line}</div> : <div key={index} className="mb-2"></div>;
-                                })}
-                              </>
+                              <div className={`prose-sm ${
+                                message.role === 'user' ? 'prose-invert' : 'prose-gray'
+                              }`}>
+                                <ReactMarkdown 
+                                  remarkPlugins={[remarkGfm]}
+                                  components={{
+                                    p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+                                    ul: ({ children }) => <ul className="mb-2 list-disc list-inside space-y-1">{children}</ul>,
+                                    ol: ({ children }) => <ol className="mb-2 list-decimal list-inside space-y-1">{children}</ol>,
+                                    li: ({ children }) => <li className="mb-1">{children}</li>,
+                                    strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                                    em: ({ children }) => <em className="italic">{children}</em>,
+                                    code: ({ children }) => (
+                                      <code className={`px-1.5 py-0.5 rounded text-xs font-mono ${
+                                        message.role === 'user' 
+                                          ? 'bg-blue-500 text-blue-100' 
+                                          : 'bg-gray-200 text-gray-800'
+                                      }`}>
+                                        {children}
+                                      </code>
+                                    ),
+                                    pre: ({ children }) => (
+                                      <pre className={`p-3 rounded mt-2 mb-2 text-xs overflow-x-auto font-mono ${
+                                        message.role === 'user' 
+                                          ? 'bg-blue-500 text-blue-100' 
+                                          : 'bg-gray-100 text-gray-800'
+                                      }`}>
+                                        {children}
+                                      </pre>
+                                    ),
+                                    h1: ({ children }) => <h1 className="text-lg font-bold mb-2">{children}</h1>,
+                                    h2: ({ children }) => <h2 className="text-base font-bold mb-2">{children}</h2>,
+                                    h3: ({ children }) => <h3 className="text-sm font-bold mb-1">{children}</h3>,
+                                    blockquote: ({ children }) => (
+                                      <blockquote className="border-l-4 border-gray-300 pl-3 ml-2 italic my-2">
+                                        {children}
+                                      </blockquote>
+                                    )
+                                  }}
+                                >
+                                  {message.content}
+                                </ReactMarkdown>
+                              </div>
                             )}
                           </div>
                           <p className={`text-xs mt-1 opacity-70`}>
