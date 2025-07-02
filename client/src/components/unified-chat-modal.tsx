@@ -181,32 +181,11 @@ export default function UnifiedChatModal({ isOpen, onClose, onSearch, onGenerate
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col">
+      <DialogContent className={`${chatMode === 'research' ? 'max-w-6xl' : 'max-w-2xl'} max-h-[90vh] flex flex-col`}>
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5" />
-              CUBOT AI Assistant
-            </div>
-            <Select value={chatMode} onValueChange={(value: 'chat' | 'research') => setChatMode(value)}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="chat">
-                  <div className="flex items-center gap-2">
-                    <MessageCircle className="h-4 w-4" />
-                    Quick Chat
-                  </div>
-                </SelectItem>
-                <SelectItem value="research">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4" />
-                    Research Mode
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5" />
+            CUBOT AI Assistant
           </DialogTitle>
         </DialogHeader>
 
@@ -215,6 +194,15 @@ export default function UnifiedChatModal({ isOpen, onClose, onSearch, onGenerate
           <div className="flex-1 flex flex-col space-y-4">
             {/* Input */}
             <div className="flex gap-2">
+              <Select value={chatMode} onValueChange={(value: 'chat' | 'research') => setChatMode(value)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="chat">Quick Chat</SelectItem>
+                  <SelectItem value="research">Research Mode</SelectItem>
+                </SelectContent>
+              </Select>
               <Input
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
