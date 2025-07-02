@@ -116,6 +116,39 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
     setIsLoading(true);
 
     try {
+      // Determine which MCP functions to use based on the query
+      const mcpFunctionsToUse = await determineMCPFunctions(userQuery);
+      let mcpResults: any = {};
+
+      // Execute MCP functions if needed
+      if (mcpFunctionsToUse.length > 0) {
+        for (const func of mcpFunctionsToUse) {
+          try {
+            let result;
+            switch (func) {
+              case 'query_gen':
+                result = await mcp.queryGen(userQuery);
+                mcpResults.queryGen = result;
+                break;
+              case 'content_search':
+                result = await mcp.contentSearch(userQuery);
+                mcpResults.contentSearch = result;
+                break;
+              case 'keywords_gen':
+                result = await mcp.keywordsGen(userQuery, 'banking_regulation');
+                mcpResults.keywordsGen = result;
+                break;
+              case 'summary':
+                result = await mcp.summary([userQuery], { style: 'executive' });
+                mcpResults.summary = result;
+                break;
+            }
+          } catch (error) {
+            console.error(`MCP ${func} error:`, error);
+          }
+        }
+      }
+
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: {
@@ -123,7 +156,8 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
         },
         body: JSON.stringify({
           message: userQuery,
-          history: messages.slice(-5)
+          history: messages.slice(-5),
+          mcpResults: mcpResults
         }),
       });
 
@@ -153,6 +187,35 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Determine which MCP functions to use based on user query
+  const determineMCPFunctions = async (query: string): Promise<string[]> => {
+    const queryLower = query.toLowerCase();
+    const functions: string[] = [];
+
+    // Use query_gen for search-related queries
+    if (queryLower.includes('search') || queryLower.includes('find') || queryLower.includes('what') || queryLower.includes('how')) {
+      functions.push('query_gen');
+    }
+
+    // Use content_search for specific regulatory topics
+    if (queryLower.includes('basel') || queryLower.includes('capital') || queryLower.includes('liquidity') || 
+        queryLower.includes('regulation') || queryLower.includes('compliance') || queryLower.includes('requirement')) {
+      functions.push('content_search');
+    }
+
+    // Use keywords_gen for broad topics
+    if (queryLower.includes('overview') || queryLower.includes('about') || queryLower.includes('explain')) {
+      functions.push('keywords_gen');
+    }
+
+    // Use summary for complex or multi-part questions
+    if (queryLower.includes('summary') || queryLower.includes('overview') || query.split(' ').length > 8) {
+      functions.push('summary');
+    }
+
+    return functions;
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -411,54 +474,7 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
             </div>
           )}
 
-          {/* MCP Function Demo Buttons */}
-          {messages.length === 1 && (
-            <div className="border rounded-lg p-4 bg-blue-50">
-              <h4 className="text-sm font-medium text-gray-900 mb-3">MCP Research Functions:</h4>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleMCPFunction('query_gen')}
-                  disabled={mcp.isProcessing}
-                  className="flex items-center gap-2 text-xs"
-                >
-                  <Search className="w-3 h-3" />
-                  Query Gen
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleMCPFunction('content_search')}
-                  disabled={mcp.isProcessing}
-                  className="flex items-center gap-2 text-xs"
-                >
-                  <FileText className="w-3 h-3" />
-                  Content Search
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleMCPFunction('keywords_gen')}
-                  disabled={mcp.isProcessing}
-                  className="flex items-center gap-2 text-xs"
-                >
-                  <Bot className="w-3 h-3" />
-                  Keywords Gen
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleMCPFunction('summary')}
-                  disabled={mcp.isProcessing}
-                  className="flex items-center gap-2 text-xs"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  Summary
-                </Button>
-              </div>
-            </div>
-          )}
+
 
           {/* Session Completion Options */}
           {showSessionComplete && (
