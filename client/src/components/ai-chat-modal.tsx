@@ -247,9 +247,9 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                                   remarkPlugins={[remarkGfm]}
                                   components={{
                                     p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
-                                    ul: ({ children }) => <ul className="mb-2 list-disc list-inside space-y-1">{children}</ul>,
-                                    ol: ({ children }) => <ol className="mb-2 list-decimal list-inside space-y-1">{children}</ol>,
-                                    li: ({ children }) => <li className="mb-1">{children}</li>,
+                                    ul: ({ children }) => <ul className="mb-3 list-disc list-outside ml-4 space-y-1">{children}</ul>,
+                                    ol: ({ children }) => <ol className="mb-3 list-decimal list-outside ml-4 space-y-1">{children}</ol>,
+                                    li: ({ children }) => <li className="mb-1 pl-1">{children}</li>,
                                     strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
                                     em: ({ children }) => <em className="italic">{children}</em>,
                                     code: ({ children }) => (
@@ -270,11 +270,11 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                                         {children}
                                       </pre>
                                     ),
-                                    h1: ({ children }) => <h1 className="text-lg font-bold mb-2">{children}</h1>,
-                                    h2: ({ children }) => <h2 className="text-base font-bold mb-2">{children}</h2>,
-                                    h3: ({ children }) => <h3 className="text-sm font-bold mb-1">{children}</h3>,
+                                    h1: ({ children }) => <h1 className="text-lg font-bold mb-2 mt-3 first:mt-0">{children}</h1>,
+                                    h2: ({ children }) => <h2 className="text-base font-bold mb-2 mt-3 first:mt-0">{children}</h2>,
+                                    h3: ({ children }) => <h3 className="text-sm font-bold mb-1 mt-2 first:mt-0">{children}</h3>,
                                     blockquote: ({ children }) => (
-                                      <blockquote className="border-l-4 border-gray-300 pl-3 ml-2 italic my-2">
+                                      <blockquote className="border-l-4 border-gray-300 pl-3 ml-2 italic my-2 bg-gray-50 py-2 rounded-r">
                                         {children}
                                       </blockquote>
                                     )
