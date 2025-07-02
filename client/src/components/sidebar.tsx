@@ -24,8 +24,7 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
   const menuItems = [
     { id: 'dashboard', label: 'RegDashboard', icon: LayoutDashboard },
     { id: 'trend', label: 'RegTrend', icon: TrendingUp },
-    { id: 'search', label: 'RegSearch', icon: Search, active: true },
-    { id: 'group', label: 'RegGroup', icon: BarChart3 },
+    { id: 'group', label: 'RegGroup', icon: BarChart3, active: true },
     { id: 'flow', label: 'RegFlow', icon: FileText },
     { id: 'map', label: 'RegMap', icon: LayoutDashboard },
     { id: 'report', label: 'RegReport', icon: FileText },

@@ -8,7 +8,7 @@ import SummaryModal from "@/components/summary-modal";
 import AIChatModal from "@/components/ai-chat-modal";
 
 export default function Home() {
-  const [currentView, setCurrentView] = useState<string>('search');
+  const [currentView, setCurrentView] = useState<string>('group');
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [showAIChatModal, setShowAIChatModal] = useState(false);
@@ -61,7 +61,7 @@ export default function Home() {
 
   const renderMainContent = () => {
     switch (currentView) {
-      case 'search':
+      case 'group':
         return (
           <div className="flex-1 flex flex-col">
             <div className="flex-1">
