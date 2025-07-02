@@ -11,12 +11,14 @@ import {
   MessageCircle,
   AlertCircle,
   CheckCircle,
-  Clock
+  Clock,
+  Sparkles
 } from "lucide-react";
 import { useExtracts } from "@/hooks/use-extracts";
 import type { Extract } from "@shared/schema";
 import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
 import EnhancedAIChatModal from "@/components/enhanced-ai-chat-modal";
+import AIChatModal from "@/components/ai-chat-modal";
 
 interface RegulatoryTableProps {
   searchQuery?: string;
@@ -24,6 +26,8 @@ interface RegulatoryTableProps {
   selectedCards: number[];
   onCardSelection: (cardId: number, selected: boolean) => void;
   onContinueChat?: () => void;
+  onSearch?: (query: string) => void;
+  onGenerateSummary?: () => void;
 }
 
 export default function RegulatoryTable({ 
@@ -31,12 +35,15 @@ export default function RegulatoryTable({
   filters, 
   selectedCards, 
   onCardSelection,
-  onContinueChat 
+  onContinueChat,
+  onSearch,
+  onGenerateSummary
 }: RegulatoryTableProps) {
   const [sortField, setSortField] = useState<string>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const [isEnhancedChatOpen, setIsEnhancedChatOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const { data: extracts, isLoading } = useExtracts(searchQuery, filters);
 
@@ -94,18 +101,29 @@ export default function RegulatoryTable({
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-semibold text-gray-900">Regulatory Groups</h1>
           <div className="flex items-center space-x-3">
-            <Button
-              onClick={() => setIsEnhancedChatOpen(true)}
-              size="sm"
-              className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-3 py-2"
-            >
-              <img 
-                src={cubotIcon} 
-                alt="CUBOT AI Assistant" 
-                className="w-5 h-5 mr-2 object-contain" 
-              />
-              Ask CUBOT
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button
+                onClick={() => setIsChatOpen(true)}
+                size="sm"
+                className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-3 py-2"
+              >
+                <img 
+                  src={cubotIcon} 
+                  alt="CUBOT AI Assistant" 
+                  className="w-5 h-5 mr-2 object-contain" 
+                />
+                Ask CUBOT
+              </Button>
+              <Button
+                onClick={() => setIsEnhancedChatOpen(true)}
+                size="sm"
+                variant="outline"
+                className="border-blue-600 text-blue-600 hover:bg-blue-50"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Enhanced
+              </Button>
+            </div>
             <Button variant="outline" size="sm" className="flex items-center">
               <Eye className="w-4 h-4 mr-2" />
               Select View
@@ -242,6 +260,14 @@ export default function RegulatoryTable({
           ))}
         </div>
       </div>
+
+      {/* Original AI Chat Modal */}
+      <AIChatModal
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        onSearch={onSearch}
+        onGenerateSummary={onGenerateSummary}
+      />
 
       {/* Enhanced AI Chat Modal */}
       <EnhancedAIChatModal
