@@ -10,11 +10,12 @@ import cubotIcon from "@assets/CUBOT-Ready_1751471469146.png";
 
 interface Message {
   id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system' | 'thinking';
   content: string;
   timestamp: Date;
   showActionButtons?: boolean;
   userQuery?: string;
+  isThinking?: boolean;
 }
 
 interface AIChatModalProps {
@@ -47,6 +48,13 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
     "How do liquidity coverage ratios work?"
   ];
 
+  const thinkingSteps = [
+    "Analyzing your question...",
+    "Reviewing relevant compliance frameworks...",
+    "Checking regulatory updates...",
+    "Formulating comprehensive response..."
+  ];
+
   const handleSendMessage = async () => {
     if (!input.trim()) return;
 
@@ -58,8 +66,30 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const userQuery = input.trim();
     setInput('');
     setIsLoading(true);
+
+    // Add thinking message
+    const thinkingMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'thinking',
+      content: '',
+      timestamp: new Date(),
+      isThinking: true
+    };
+
+    setMessages(prev => [...prev, thinkingMessage]);
+
+    // Simulate thinking steps
+    for (let i = 0; i < thinkingSteps.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setMessages(prev => prev.map(msg => 
+        msg.id === thinkingMessage.id 
+          ? { ...msg, content: thinkingSteps[i] }
+          : msg
+      ));
+    }
 
     try {
       const response = await fetch('/api/ai/chat', {
@@ -68,8 +98,8 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: input.trim(),
-          history: messages.slice(-5) // Send last 5 messages for context
+          message: userQuery,
+          history: messages.slice(-5)
         }),
       });
 
@@ -79,18 +109,23 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
 
       const data = await response.json();
       
+      // Remove thinking message and add assistant response
+      setMessages(prev => prev.filter(msg => msg.id !== thinkingMessage.id));
+      
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: (Date.now() + 2).toString(),
         role: 'assistant',
         content: data.response,
         timestamp: new Date(),
         showActionButtons: true,
-        userQuery: input.trim()
+        userQuery: userQuery
       };
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
+      // Remove thinking message on error
+      setMessages(prev => prev.filter(msg => msg.id !== thinkingMessage.id));
       toast({
         title: "Error",
         description: "Failed to get AI response. Please try again.",
@@ -189,12 +224,21 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                     <div className={`flex items-start space-x-2 ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
                       <div className={`p-2 rounded-full ${
                         message.role === 'user' ? 'bg-blue-100' : 
-                        message.role === 'system' ? 'bg-green-100' : 'bg-gray-100'
+                        message.role === 'system' ? 'bg-green-100' : 
+                        message.role === 'thinking' ? 'bg-purple-100' : 'bg-gray-100'
                       }`}>
                         {message.role === 'user' ? (
                           <User className="w-4 h-4 text-blue-600" />
                         ) : message.role === 'system' ? (
                           <CheckCircle className="w-4 h-4 text-green-600" />
+                        ) : message.role === 'thinking' ? (
+                          <div className="animate-spin">
+                            <img 
+                              src={cubotIcon} 
+                              alt="CUBOT AI Assistant" 
+                              className="w-4 h-4" 
+                            />
+                          </div>
                         ) : (
                           <img 
                             src={cubotIcon} 
@@ -207,39 +251,53 @@ export default function AIChatModal({ isOpen, onClose, onSearch, onGenerateSumma
                         <div className={`p-3 rounded-lg ${
                           message.role === 'user' ? 'bg-blue-600 text-white' : 
                           message.role === 'system' ? 'bg-green-50 text-green-900 border border-green-200' : 
+                          message.role === 'thinking' ? 'bg-purple-50 text-purple-900 border border-purple-200' :
                           'bg-gray-100 text-gray-900'
                         }`}>
                           <div className="text-sm whitespace-pre-wrap prose prose-sm max-w-none">
-                            {message.content.split('\n').map((line, index) => {
-                              // Handle bullet points
-                              if (line.trim().startsWith('• **')) {
-                                const match = line.match(/• \*\*(.*?)\*\*: (.+)/);
-                                if (match) {
-                                  return (
-                                    <div key={index} className="mb-1">
-                                      • <strong>{match[1]}</strong>: {match[2]}
-                                    </div>
-                                  );
-                                }
-                              }
-                              // Handle bold text
-                              if (line.includes('**')) {
-                                const parts = line.split(/(\*\*.*?\*\*)/);
-                                return (
-                                  <div key={index} className="mb-1">
-                                    {parts.map((part, partIndex) => 
-                                      part.startsWith('**') && part.endsWith('**') ? (
-                                        <strong key={partIndex}>{part.slice(2, -2)}</strong>
-                                      ) : (
-                                        part
-                                      )
-                                    )}
-                                  </div>
-                                );
-                              }
-                              // Regular line
-                              return line.trim() ? <div key={index} className="mb-1">{line}</div> : <div key={index} className="mb-2"></div>;
-                            })}
+                            {message.role === 'thinking' ? (
+                              <div className="flex items-center space-x-2">
+                                <div className="flex space-x-1">
+                                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                                </div>
+                                <span className="text-purple-700 italic">{message.content}</span>
+                              </div>
+                            ) : (
+                              <>
+                                {message.content.split('\n').map((line, index) => {
+                                  // Handle bullet points
+                                  if (line.trim().startsWith('• **')) {
+                                    const match = line.match(/• \*\*(.*?)\*\*: (.+)/);
+                                    if (match) {
+                                      return (
+                                        <div key={index} className="mb-1">
+                                          • <strong>{match[1]}</strong>: {match[2]}
+                                        </div>
+                                      );
+                                    }
+                                  }
+                                  // Handle bold text
+                                  if (line.includes('**')) {
+                                    const parts = line.split(/(\*\*.*?\*\*)/);
+                                    return (
+                                      <div key={index} className="mb-1">
+                                        {parts.map((part, partIndex) => 
+                                          part.startsWith('**') && part.endsWith('**') ? (
+                                            <strong key={partIndex}>{part.slice(2, -2)}</strong>
+                                          ) : (
+                                            part
+                                          )
+                                        )}
+                                      </div>
+                                    );
+                                  }
+                                  // Regular line
+                                  return line.trim() ? <div key={index} className="mb-1">{line}</div> : <div key={index} className="mb-2"></div>;
+                                })}
+                              </>
+                            )}
                           </div>
                           <p className={`text-xs mt-1 opacity-70`}>
                             {message.timestamp.toLocaleTimeString()}
