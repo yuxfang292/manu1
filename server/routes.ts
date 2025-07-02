@@ -111,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Call Gemini API
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.5-pro",
         contents: `You are an expert AI compliance assistant specializing in banking and financial regulations. Provide detailed, accurate guidance on regulatory requirements, compliance frameworks, and best practices. Focus on practical, actionable advice for banking professionals. Use clear formatting with bullet points and bold text for key information.
 
 User question: ${message}`,
