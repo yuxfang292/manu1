@@ -58,53 +58,78 @@ export default function ChatInterface({ onSearch, onPreConfiguredQuery }: ChatIn
   ];
 
   return (
-    <div className="bg-primary-white rounded-lg shadow-sm border border-secondary-grey p-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-primary-black mb-2">
-          Welcome to Regulatory Compliance Explorer
-        </h2>
-        <p className="text-primary-black opacity-70">
-          Enter your compliance query or select from common questions below
-        </p>
-      </div>
+    <div className="welcome-container bg-white rounded-lg border border-gray-200 p-8 relative overflow-hidden h-full">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full -translate-y-32 translate-x-32"></div>
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-50/50 to-indigo-50/30 rounded-full translate-y-24 -translate-x-24"></div>
       
-      <form onSubmit={handleSubmit} className="mb-4">
-        <div className="relative">
-          <Input
-            type="text"
-            placeholder="Ask about regulations, compliance requirements, or specific obligations..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full px-4 py-3 border border-primary-grey rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent pr-12"
-          />
-          <Button
-            type="submit"
-            size="sm"
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary-blue hover:bg-primary-blue/90 text-primary-white"
-          >
-            <Search className="w-4 h-4" />
-          </Button>
+      <div className="relative z-10">
+        <div className="text-center mb-8">
+          <h2 className="welcome-title text-3xl font-bold mb-3">
+            Welcome to Regulatory Compliance Explorer
+          </h2>
+          <p className="welcome-subtitle text-primary-black opacity-80 text-lg max-w-2xl mx-auto">
+            Discover and explore banking regulations with our intelligent search system
+          </p>
+          <div className="mt-4 flex justify-center space-x-2">
+            <div className="w-2 h-2 bg-primary-blue rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-accent-blue rounded-full animate-pulse" style={{animationDelay: '0.3s'}}></div>
+            <div className="w-2 h-2 bg-supporting-blue rounded-full animate-pulse" style={{animationDelay: '0.6s'}}></div>
+          </div>
         </div>
-      </form>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {preConfiguredQuestions.map((question) => {
-          const IconComponent = question.icon;
-          return (
+        
+        <form onSubmit={handleSubmit} className="search-container mb-8">
+          <div className="relative bg-white rounded-xl shadow-lg">
+            <Input
+              type="text"
+              placeholder="Ask about regulations, compliance requirements, or specific obligations..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full px-6 py-4 text-lg border-2 border-primary-grey/30 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-blue/20 focus:border-primary-blue pr-16 bg-white/50 backdrop-blur-sm"
+            />
             <Button
-              key={question.category}
-              variant="outline"
-              className="p-3 bg-supporting-blue text-primary-black rounded-lg hover:bg-accent-blue transition-colors text-left h-auto flex flex-col items-start space-y-1"
-              onClick={() => onPreConfiguredQuery(question.category)}
+              type="submit"
+              size="lg"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-primary-blue to-accent-blue hover:from-primary-blue/90 hover:to-accent-blue/90 text-primary-white rounded-lg pulse-glow"
             >
-              <div className="flex items-center space-x-2">
-                <IconComponent className="w-4 h-4 text-primary-blue" />
-                <span className="font-bold">{question.title}</span>
-              </div>
-              <p className="text-sm opacity-70">{question.description}</p>
+              <Search className="w-5 h-5" />
             </Button>
-          );
-        })}
+          </div>
+        </form>
+        
+        <div className="category-grid">
+          <h3 className="text-xl font-bold text-primary-black mb-4 text-center">
+            Popular Compliance Areas
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {preConfiguredQuestions.map((question, index) => {
+              const IconComponent = question.icon;
+              return (
+                <Button
+                  key={question.category}
+                  variant="outline"
+                  className="category-button p-4 bg-gradient-to-br from-supporting-blue to-accent-blue/50 text-primary-black rounded-xl hover:from-accent-blue hover:to-supporting-blue text-left h-auto flex flex-col items-start space-y-2 border-2 border-primary-grey/20"
+                  onClick={() => onPreConfiguredQuery(question.category)}
+                  style={{animationDelay: `${index * 0.1}s`}}
+                >
+                  <div className="flex items-center space-x-3 w-full">
+                    <div className="p-2 bg-primary-blue/10 rounded-lg">
+                      <IconComponent className="w-5 h-5 text-primary-blue icon-bounce" />
+                    </div>
+                    <span className="font-bold text-lg">{question.title}</span>
+                  </div>
+                  <p className="text-sm opacity-80 leading-relaxed">{question.description}</p>
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+        
+        <div className="mt-8 text-center">
+          <p className="text-sm text-primary-black opacity-60">
+            AI-powered regulatory intelligence • Real-time compliance data • Professional reports
+          </p>
+        </div>
       </div>
     </div>
   );
