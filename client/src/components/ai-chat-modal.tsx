@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Send, Bot, User, Sparkles, Search, CheckCircle } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Search, CheckCircle, FileText, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Message {
